@@ -1,4 +1,4 @@
-"""create table new_ass
+"""create table user, question and choice
 
 Revision ID: 1727292a02a5
 Revises: 
