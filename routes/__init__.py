@@ -8,7 +8,9 @@ def apply_routes(app):
         module_in_file = __import__("routes." + str(p))
         files_module = getattr(module_in_file, p)
         init = getattr(files_module, 'init')
-        init(app)
+        if "init" in dir():
+            init(app)
+            del init
 
     app.router.add_static("/",
                           path=str(app['config']['root_path'] / "static"),

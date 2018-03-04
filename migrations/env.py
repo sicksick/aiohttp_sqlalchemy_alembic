@@ -46,7 +46,7 @@ def run_migrations_offline():
 
     """
     url = str()
-    with open("config.yaml", 'r') as stream:
+    with open("config/config.yaml", 'r') as stream:
         try:
             config = yaml.load(stream)
             connection = config['connection']
@@ -71,7 +71,7 @@ def run_migrations_online():
 
     """
     url = str()
-    with open("config.yaml", 'r') as stream:
+    with open("config/config.yaml", 'r') as stream:
         try:
             config_yaml = yaml.load(stream)
             connection = config_yaml['connection']
