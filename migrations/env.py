@@ -1,20 +1,15 @@
 from __future__ import with_statement
 import os, sys
 sys.path.append(os.getcwd())
-from sqlalchemy import engine_from_config, pool, MetaData
+from sqlalchemy import engine_from_config, pool, MetaData, Table
 import yaml
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
-from model import user, choice, question
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 fileConfig(config.config_file_name)
-
-
+model_list = dir()
+from model import *
+new_model = [model for model in dir() if model not in model_list]
 
 
 def combine_metadata(*args):
@@ -25,7 +20,19 @@ def combine_metadata(*args):
     return m
 
 
-target_metadata = combine_metadata(choice.metadata, question.metadata, user.metadata)
+module_in_file = __import__("model")
+meta_list = list()
+
+for item in new_model:
+    try:
+        files_module = getattr(module_in_file, item)
+        if isinstance(files_module, Table) is True:
+            meta_list.append(files_module.metadata)
+    except:
+        continue
+
+
+target_metadata = combine_metadata(permission.metadata, permission_user.metadata, user.metadata)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -50,7 +57,8 @@ def run_migrations_offline():
         try:
             config = yaml.load(stream)
             connection = config['connection']
-            url = f"{connection['type']}://{connection['user']}:{connection['password']}@{connection['host']}:{connection['port']}/{connection['database']}"
+            url = f"{connection['type']}://{connection['user']}:{connection['password']}@" \
+                  f"{connection['host']}:{connection['port']}/{connection['database']}"
         except yaml.YAMLError as exc:
             print(exc)
 
@@ -75,7 +83,8 @@ def run_migrations_online():
         try:
             config_yaml = yaml.load(stream)
             connection = config_yaml['connection']
-            url = f"{connection['type']}://{connection['user']}:{connection['password']}@{connection['host']}:{connection['port']}/{connection['database']}"
+            url = f"{connection['type']}://{connection['user']}:{connection['password']}@" \
+                  f"{connection['host']}:{connection['port']}/{connection['database']}"
         except yaml.YAMLError as exc:
             print(exc)
 

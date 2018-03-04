@@ -1,7 +1,4 @@
 import pathlib
-
-import aioredis
-import asyncio
 from aiohttp import web
 from config import setup_config
 from config.connect_redis import redis_connect
