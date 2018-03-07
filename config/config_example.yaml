@@ -1,5 +1,5 @@
 connection:
-  database: test
+  database: aiohttp_sqlalchemy_alembic
   user: postgres
   password: postgres
   host: localhost
