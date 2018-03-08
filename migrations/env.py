@@ -14,9 +14,10 @@ new_model = [model for model in dir() if model not in model_list]
 
 def combine_metadata(*args):
     m = MetaData()
-    for metadata in args:
-        for t in metadata.tables.values():
-            t.tometadata(m)
+    for metadata_temp in args:
+        for metadata in metadata_temp:
+            for t in metadata.tables.values():
+                t.tometadata(m)
     return m
 
 
@@ -32,7 +33,7 @@ for item in new_model:
         continue
 
 
-target_metadata = combine_metadata(permission.metadata, permission_user.metadata, user.metadata)
+target_metadata = combine_metadata(meta_list)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

@@ -15,17 +15,15 @@ user = sa.Table(
     sa.Column('updated_at', sa.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 )
 
-permission_user = sa.Table(
-    'user_permission', meta,
-    sa.Column('user_id', sa.Integer, ForeignKey('users.id'), nullable=False),
-    sa.Column('permission_id', sa.Integer, ForeignKey('permissions.id'), nullable=False),
-    sa.Column('active', sa.Boolean(), nullable=False),
-)
-
-permission = sa.Table(
-    'permissions', meta,
+group = sa.Table(
+    'groups', meta,
     sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('role', sa.String, nullable=False)
+    sa.Column('role', sa.String, nullable=False),
 )
 
+user_group = sa.Table(
+    'user_groups', meta,
+    sa.Column('user_id', sa.Integer, ForeignKey('users.id'), nullable=False),
+    sa.Column('group_id', sa.Integer, ForeignKey('groups.id'), nullable=False)
+)
 

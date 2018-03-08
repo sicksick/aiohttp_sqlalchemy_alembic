@@ -2,7 +2,7 @@ import pathlib
 from aiohttp import web
 from config import setup_config
 from config.connect_redis import redis_connect
-from db import init_pg, close_pg
+from config.db import init_pg, close_pg
 from aiohttp_session import setup
 from middleware.errors import errors_middleware
 from middleware.police import police_middleware

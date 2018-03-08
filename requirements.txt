@@ -18,3 +18,5 @@ PyYAML
 six
 SQLAlchemy
 yarl
+aiohttp_session
+aioredis
