@@ -1,29 +1,41 @@
 import datetime
-import sqlalchemy as sa
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, DateTime, Integer, Sequence, String, Text, func, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 
-meta = sa.MetaData()
+Base = declarative_base()
 
 
-user = sa.Table(
-    'users', meta,
-    sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('email', sa.String),
-    sa.Column('password', sa.String),
-    sa.Column('name', sa.String, nullable=True),
-    sa.Column('created_at', sa.DateTime, default=datetime.datetime.now),
-    sa.Column('updated_at', sa.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-)
+class Message(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, Sequence('msg_id_seq'), primary_key=True, nullable=False)
+    username = Column(String(40), nullable=False)
+    message = Column(Text)
+    timestamp = Column(DateTime(), server_default=func.now(), nullable=False)
 
-group = sa.Table(
-    'groups', meta,
-    sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('role', sa.String, nullable=False),
-)
 
-user_group = sa.Table(
-    'user_groups', meta,
-    sa.Column('user_id', sa.Integer, ForeignKey('users.id'), nullable=False),
-    sa.Column('group_id', sa.Integer, ForeignKey('groups.id'), nullable=False)
-)
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
+
+class Group(Base):
+    __tablename__ = 'groups'
+    id = Column(Integer, primary_key=True, nullable=False)
+    role = Column(String, nullable=False)
+
+
+class UserGroups(Base):
+    __tablename__ = 'user_groups'
+    id = Column(Integer, primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    group_id = Column(Integer, ForeignKey('groups.id'), nullable=False)
+
+
+sa_user_group = UserGroups.__table__
+sa_group = Group.__table__
+sa_user = User.__table__
+sa_message = Message.__table__

@@ -4,8 +4,9 @@ from aiohttp_session import get_session
 
 
 def init(app):
-    app.router.add_get('/list/', list_f)
-    app.router.add_get('/list/{name}', list_f)
+    prefix = '/api'
+    app.router.add_get(prefix + '/list/', list_f)
+    app.router.add_get(prefix + '/list/{name}', list_f)
 
 
 async def list_f(request):

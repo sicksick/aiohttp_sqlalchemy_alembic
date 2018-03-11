@@ -3,7 +3,7 @@ import os
 
 def apply_routes(app):
 
-    for file in [file for file in os.listdir(app['config']['root_path']/"routes/")
+    for file in [file for file in os.listdir(app.config['root_path'] + "/routes/")
              if file != '__pycache__' and file != '__init__.py']:
         p, m = file.rsplit('.', 1)
         module_in_file = __import__("routes." + str(p))
@@ -14,5 +14,5 @@ def apply_routes(app):
             del init
 
     # app.router.add_static("/",
-    #                       path=str(app['config']['root_path'] / "static"),
+    #                       path=str(app.config.['root_path'] / "static"),
     #                       name="static")

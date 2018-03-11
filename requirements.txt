@@ -20,3 +20,5 @@ SQLAlchemy
 yarl
 aiohttp_session
 aioredis
+pyjwt
+bcrypt

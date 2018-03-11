@@ -2,7 +2,7 @@ import aiopg.sa
 
 
 async def init_pg(app):
-    conf = app['config']['connection']
+    conf = app.config['connection']
     engine = await aiopg.sa.create_engine(
         database=conf['database'],
         user=conf['user'],
@@ -12,7 +12,7 @@ async def init_pg(app):
         minsize=conf['minsize'],
         maxsize=conf['maxsize'],
         loop=app.loop)
-    app['db'] = engine
+    setattr(app, 'db', engine)
 
 
 async def close_pg(app):

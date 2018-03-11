@@ -4,9 +4,10 @@ from aiohttp_session import get_session
 
 
 def init(app):
-    app.router.add_get('/as', home)
-    app.router.add_get('/', home)
-    app.router.add_get('/{name}', home)
+    prefix = '/api'
+    app.router.add_get(prefix + '/as', home)
+    app.router.add_get(prefix + '/', home)
+    app.router.add_get(prefix + '/{name}', home)
 
 
 async def home(request):
