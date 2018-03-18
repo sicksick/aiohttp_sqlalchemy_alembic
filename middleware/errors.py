@@ -1,34 +1,35 @@
-from aiohttp import web
-from aiohttp.web_exceptions import HTTPException, HTTPClientError
+import json
+import traceback
+from aiohttp.web_exceptions import HTTPException
+from aiohttp.web_response import Response
+from helpers.irc import irc
 
 
-PLAIN_TYPE = "text/plain"
-JSON_TYPE = "application/json"
+class CustomHTTPException(Response, Exception):
 
-
-def error(message="Error", status=519):
-    return web.Response(text=message,
-                        status=status,
-                        content_type=PLAIN_TYPE)
+    def __init__(self, body=irc['INTERNAL_SERVER_ERROR'], status=400):
+        Response.__init__(self,
+                          status=status,
+                          headers=None,
+                          reason=None,
+                          text=None,
+                          content_type='application/json',
+                          body=json.dumps({"error": body}),
+        )
 
 
 async def errors_middleware(app, handler):
-
-    show_error_details = True
 
     async def errors_middleware_handler(request):
         try:
             response = await handler(request)
         except HTTPException as e:
             return e
-        except HTTPClientError as e:
+        except CustomHTTPException as e:
             return e
-        except Exception as ex:
-            if show_error_details:
-                # return error details to the client
-                return error(message=str(ex))
-            # hide error details
-            return error()
+        except Exception as e:
+            request.app.loggers['rotating'].error(str(traceback.format_exc()))
+            return CustomHTTPException()
 
         return response
     return errors_middleware_handler

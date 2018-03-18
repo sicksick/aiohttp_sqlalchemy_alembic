@@ -61,3 +61,6 @@ build/
 venv/
 /venv/
 tests/report/
+/config/config.yaml
+config.yaml
+config.yml

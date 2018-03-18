@@ -1,10 +1,8 @@
+import traceback
+
 from aiohttp import web
-from aiohttp.web_exceptions import HTTPException, HTTPClientError, HTTPUnauthorized
-from middleware.errors import error
-
-
-PLAIN_TYPE = "text/plain"
-JSON_TYPE = "application/json"
+from aiohttp.web_exceptions import HTTPException, HTTPUnauthorized
+from middleware.errors import CustomHTTPException
 
 
 @web.middleware
@@ -15,10 +13,11 @@ async def police_middleware(request, handler):
         response = await handler(request)
     except HTTPException as e:
         return e
-    except HTTPClientError as e:
+    except CustomHTTPException as e:
         return e
-    except Exception as ex:
-        return error()
+    except Exception as e:
+        request.app.loggers['rotating'].error(str(traceback.format_exc()))
+        return CustomHTTPException()
 
     return response
 

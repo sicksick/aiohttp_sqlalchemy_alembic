@@ -1,5 +1,6 @@
+debug: True
 connection:
-  database: aiohttp_sqlalchemy_alembic
+  database: test
   user: postgres
   password: postgres
   host: localhost
@@ -13,4 +14,4 @@ redis:
 
 host: 127.0.0.1
 port: 8080
-root_path:
+log_path: logs

@@ -1,7 +1,8 @@
 import time
-from aiohttp.web import json_response, HTTPServerError
+from aiohttp.web import json_response
 from aiohttp_session import get_session
-from model import sa_user
+import sqlalchemy as sa
+from model import sa_user, sa_group, sa_user_group
 
 
 def init(app):
@@ -22,18 +23,30 @@ async def login(request):
     return json_response({"ssss": "asdasd"})
 
 
+# query = sa.select(
+#     [sa_user, sa_user_group.c.user_id, sa_user_group.c.group_id, sa_group.c.role, sa_group.c.id.label('group_id_d')]) \
+#     .select_from(
+#     sa_user
+#         .join(sa_user_group, sa_user.c.id == sa_user_group.c.user_id, isouter=True)
+#         .join(sa_group, sa_user_group.c.group_id == sa_group.c.id, isouter=True)
+# )
+
+
 async def registration(request):
-    try:
-        data = await request.json()
-        async with request.app.db.acquire() as conn:
-            users = list(map(lambda x: dict(x), await conn.execute(sa_user
-                                                                   .select()
-                                                                   .where(sa_user.c.id == 1)
-                                                                   )))
-            users
-        return json_response({"users": users})
-    except Exception as e:
-        return HTTPServerError()
+    data = await request.json()
+    async with request.app.db.acquire() as conn:
+        query = sa.select([sa_user, sa_user_group.c.user_id, sa_user_group.c.group_id, sa_group.c.role, sa_group.c.id.label('group_id_d')]) \
+            .select_from(
+            sa_user
+                .join(sa_user_group, sa_user.c.id == sa_user_group.c.user_id, isouter=True)
+                .join(sa_group, sa_user_group.c.group_id == sa_group.c.id, isouter=True)
+        )
 
-
-
+        print(query)
+        users = list(
+            map(lambda x: dict(x),
+                await conn.execute(query)
+                )
+        )
+    5/0
+    # return json_response({"users": users})
