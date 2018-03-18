@@ -64,3 +64,5 @@ tests/report/
 /config/config.yaml
 config.yaml
 config.yml
+/logs/*.*
+logs
