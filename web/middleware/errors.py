@@ -2,7 +2,7 @@ import json
 import traceback
 from aiohttp.web_exceptions import HTTPException
 from aiohttp.web_response import Response
-from helpers.irc import irc
+from web.helpers.irc import irc
 
 
 class CustomHTTPException(Response, Exception):

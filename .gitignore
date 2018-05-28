@@ -70,3 +70,4 @@ redis_data
 postgres-data
 .DS_Store
 .env
+docker-compose.yml

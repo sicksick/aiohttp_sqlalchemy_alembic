@@ -2,14 +2,14 @@ import logging
 import pathlib
 import os
 from aiohttp import web
-from config import setup_config
-from config.connect_redis import redis_connect
-from config.db import init_pg, close_pg
+from web.config import setup_config
+from web.config.connect_redis import redis_connect
+from web.config.db import init_pg, close_pg
 from aiohttp_session import setup
-from helpers.log import create_loggers
-from middleware.errors import errors_middleware
-from middleware.police import police_middleware
-from routes import apply_routes
+from web.helpers.log import create_loggers
+from web.middleware.errors import errors_middleware
+from web.middleware.police import police_middleware
+from web.routes import apply_routes
 
 
 async def dispose_redis_pool(app):

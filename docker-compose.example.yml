@@ -12,9 +12,9 @@ services:
     restart: always
     env_file: .env
     build: ./web
-    command: bash -I -c "python app.py"
+    command: bash -I -c "sleep 3; python /code/web/app.py"
     volumes:
-      - ./web:/code
+      - .:/code
     ports:
       - "8000:8000"
   db:

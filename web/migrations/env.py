@@ -54,6 +54,7 @@ def run_migrations_offline():
 
     """
     url = str()
+    # TODO write function from env variable
     with open("config/config.yaml", 'r') as stream:
         try:
             config = yaml.load(stream)

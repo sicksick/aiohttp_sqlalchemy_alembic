@@ -2,7 +2,7 @@ import time
 from aiohttp.web import json_response
 from aiohttp_session import get_session
 import sqlalchemy as sa
-from model import sa_user, sa_group, sa_user_group
+from web.model import sa_user, sa_group, sa_user_group
 
 
 def init(app):
