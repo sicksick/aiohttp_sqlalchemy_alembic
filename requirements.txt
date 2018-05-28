@@ -9,8 +9,6 @@ idna-ssl
 Mako
 MarkupSafe
 multidict
-pkg-resources
-psycopg2
 psycopg2-binary
 python-dateutil
 python-editor

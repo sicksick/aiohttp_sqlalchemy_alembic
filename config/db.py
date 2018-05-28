@@ -1,21 +1,21 @@
 import aiopg.sa
+import os
 
 
 async def init_pg(app):
-    conf = app.config['connection']
     engine = await aiopg.sa.create_engine(
-        database=conf['database'],
-        user=conf['user'],
-        password=conf['password'],
-        host=conf['host'],
-        port=conf['port'],
-        minsize=conf['minsize'],
-        maxsize=conf['maxsize'],
+        database=os.getenv('POSTGRES_DB'),
+        user=os.getenv('POSTGRES_USER'),
+        password=os.getenv('POSTGRES_PASSWORD'),
+        host=os.getenv('POSTGRES_HOST'),
+        port=os.getenv('POSTGRES_PORT'),
+        minsize=1,
+        maxsize=5,
         loop=app.loop)
     setattr(app, 'db', engine)
 
 
 async def close_pg(app):
-    app['db'].close()
-    await app['db'].wait_closed()
+    app.db.close()
+    await app.db.wait_closed()
 

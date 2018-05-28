@@ -66,3 +66,7 @@ config.yaml
 config.yml
 /logs/*.*
 logs
+redis_data
+postgres-data
+.DS_Store
+.env

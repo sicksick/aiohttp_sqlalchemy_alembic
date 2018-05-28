@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    depends_on:
+      - db
+      - redis
+    networks:
+      - backend
+    links:
+      - db
+      - redis
+    restart: always
+    env_file: .env
+    build: .
+    command: bash -I -c "python app.py"
+    volumes:
+      - .:/code
+      - ./static:/static
+    ports:
+      - "8000:8000"
+  db:
+    networks:
+      - backend
+    image: postgres:latest
+    env_file: .env
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "8003:5432"
+  redis:
+    networks:
+      - backend
+    image: redis:latest
+    volumes:
+      - ./redis_data:/data
+    ports:
+      - "6379:6379"
+
+networks:
+  backend:

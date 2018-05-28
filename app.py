@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import os
 from aiohttp import web
 from config import setup_config
 from config.connect_redis import redis_connect
@@ -19,7 +20,7 @@ app = web.Application()
 # Add config to app
 setup_config(app, pathlib.Path(__file__).parent)
 
-if app.config['debug'] is True:
+if os.getenv('DEBUG', False) is True:
     logging.getLogger().setLevel(logging.INFO)
     logging.debug("Logging started")
 
@@ -44,4 +45,4 @@ app.on_startup.append(init_pg)
 app.on_cleanup.append(close_pg)
 app.on_cleanup.append(dispose_redis_pool)
 
-web.run_app(app)
+web.run_app(app, host=os.getenv('HOST', '0.0.0.0'), port=os.getenv('PORT', '8000'))
