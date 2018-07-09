@@ -21,3 +21,4 @@ aioredis
 pyjwt
 bcrypt
 aiohttp-jinja2
+jinja2
