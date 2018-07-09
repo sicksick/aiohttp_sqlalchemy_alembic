@@ -2,7 +2,7 @@ import traceback
 
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPException, HTTPUnauthorized
-from web.middleware.errors import CustomHTTPException
+from middleware.errors import CustomHTTPException
 
 
 @web.middleware

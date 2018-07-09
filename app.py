@@ -1,15 +1,16 @@
 import logging
-import pathlib
 import os
+
+from config.jinja_init import jinja_init
 from aiohttp import web
-from web.config import setup_config
-from web.config.connect_redis import redis_connect
-from web.config.db import init_pg, close_pg
+from config import setup_config
+from config.connect_redis import redis_connect
+from config.db import init_pg, close_pg
 from aiohttp_session import setup
-from web.helpers.log import create_loggers
-from web.middleware.errors import errors_middleware
-from web.middleware.police import police_middleware
-from web.routes import apply_routes
+from helpers.log import create_loggers
+from middleware.errors import errors_middleware
+from middleware.police import police_middleware
+from routes import apply_routes
 
 
 async def dispose_redis_pool(app):
@@ -17,13 +18,16 @@ async def dispose_redis_pool(app):
     await redis_pool.wait_closed()
 
 app = web.Application()
-# Add config to app
-setup_config(app, pathlib.Path(__file__).parent)
 
-if os.getenv('DEBUG', False) is True:
+# Add config to app
+setup_config(app)
+
+# Add templates render
+jinja_init(app)
+
+if bool(os.getenv('DEBUG', False)) is True:
     logging.getLogger().setLevel(logging.INFO)
     logging.debug("Logging started")
-
 
 # Redis connect
 storage, redis_pool = redis_connect(app)
