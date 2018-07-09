@@ -8,6 +8,9 @@ from middleware.errors import CustomHTTPException
 @web.middleware
 async def police_middleware(request, handler):
     try:
+        if len(request.rel_url.raw_parts) == 3 and request.rel_url.raw_parts[2] == 'login':
+            response = await handler(request)
+            return response
         if request.rel_url.raw_parts[1] == "api":
             raise HTTPUnauthorized()
         response = await handler(request)

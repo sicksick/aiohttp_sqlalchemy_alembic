@@ -2,7 +2,6 @@ from __future__ import with_statement
 import os, sys
 sys.path.append(os.getcwd())
 from sqlalchemy import engine_from_config, pool, MetaData, Table
-import yaml
 from alembic import context
 from logging.config import fileConfig
 config = context.config
@@ -53,16 +52,9 @@ def run_migrations_offline():
     script output.
 
     """
-    url = str()
-    # TODO write function from env variable
-    with open("config/config.yaml", 'r') as stream:
-        try:
-            config = yaml.load(stream)
-            connection = config['connection']
-            url = f"{connection['type']}://{connection['user']}:{connection['password']}@" \
-                  f"{connection['host']}:{connection['port']}/{connection['database']}"
-        except yaml.YAMLError as exc:
-            print(exc)
+    url = f"{os.getenv('POSTGRES_TYPE')}://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@" \
+          f"{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+
 
     context.configure(
         url=url, target_metadata=target_metadata, literal_binds=True)
@@ -78,15 +70,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    url = str()
-    with open("config/config.yaml", 'r') as stream:
-        try:
-            config_yaml = yaml.load(stream)
-            connection = config_yaml['connection']
-            url = f"{connection['type']}://{connection['user']}:{connection['password']}@" \
-                  f"{connection['host']}:{connection['port']}/{connection['database']}"
-        except yaml.YAMLError as exc:
-            print(exc)
+    url = f"{os.getenv('POSTGRES_TYPE')}://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@" \
+          f"{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
 
     config_dict = config.get_section(config.config_ini_section)
     config_dict['sqlalchemy.url'] = url

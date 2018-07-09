@@ -1,16 +1,7 @@
-import datetime
-from sqlalchemy import Column, DateTime, Integer, Sequence, String, Text, func, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, func, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-
-
-class Message(Base):
-    __tablename__ = 'messages'
-    id = Column(Integer, Sequence('msg_id_seq'), primary_key=True, nullable=False)
-    username = Column(String(40), nullable=False)
-    message = Column(Text)
-    timestamp = Column(DateTime(), server_default=func.now(), nullable=False)
 
 
 class User(Base):
@@ -38,4 +29,3 @@ class UserGroups(Base):
 sa_user_group = UserGroups.__table__
 sa_group = Group.__table__
 sa_user = User.__table__
-sa_message = Message.__table__
