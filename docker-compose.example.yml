@@ -22,7 +22,7 @@ services:
   postgres:
     networks:
       - backend
-    image: postgres:11
+    image: postgres:9.6
     env_file: .env
     volumes:
       - ./data/postgres-data:/var/lib/postgresql/data
