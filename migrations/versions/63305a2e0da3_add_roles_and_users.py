@@ -1,4 +1,4 @@
-"""some descriptions
+"""add roles and users
 
 Revision ID: 63305a2e0da3
 Revises: 
