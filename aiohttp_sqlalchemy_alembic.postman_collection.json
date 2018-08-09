@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "a8ece4ef-0874-58c4-fe7f-f2b322b2365f",
+		"name": "aiohttp_sqlalchemy_alembic",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/api/user/login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3b3JrZXIiOnsiaWQiOjUsImVtYWlsIjoibmF0NDEzMTBAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkd3ouLlBiVk4uS3RkUG4zZUp6cm00dU5oVVF6RjJxWnNJbi9qNVFRSUZRd0IuVDkuTnNYTi4iLCJmaXJzdG5hbWUiOm51bGwsImxhc3RuYW1lIjpudWxsLCJpbWFnZSI6bnVsbH0sInJvbGVzIjpbIndvcmtlciIsImFkbWluIl19.60pcO3NyRMIuM3vyTE36jCzMfwuXw2733ZOK7UYtz1g",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"qwerqwer\"\n}"
+				},
+				"url": {
+					"raw": "{{server}}/api/user/login",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/api/user     CREATE_USER",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token {{token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"god0@gmail.com\",\n  \"password\": \"qwerqwer\",\n  \"roles\": [\"worker\", \"admin\"]\n} "
+				},
+				"url": {
+					"raw": "{{server}}/api/user",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"user"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -38,7 +38,7 @@ async def create_user(request):
     else:
         return CustomHTTPException(irc['ACCESS_DENIED'], 401)
 
-    return json_response({"token": encoded, "roles": roles})
+    return json_response({"roles": roles})
 
 
 async def login(request):

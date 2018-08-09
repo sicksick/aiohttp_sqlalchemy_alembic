@@ -11,8 +11,13 @@
     docker-compose exec web python create_admin.py
 ```
 
+##### Postman collection
+```
+    aiohttp_sqlalchemy_alembic.postman_collection.json
+```
+
  
-##### Rest api based on AIOHTTP with: s
+##### Rest api based on AIOHTTP with:
 ```
     - Socket.io;
     - Sqlalchemy;
