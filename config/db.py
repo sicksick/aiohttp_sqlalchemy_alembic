@@ -1,5 +1,8 @@
-import aiopg.sa
 import os
+
+import aiopg.sa
+
+from config import config
 
 
 async def init_pg(app):
@@ -12,6 +15,7 @@ async def init_pg(app):
         minsize=1,
         maxsize=5,
         loop=app.loop)
+    config['db'] = engine
     setattr(app, 'db', engine)
 
 

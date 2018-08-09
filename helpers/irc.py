@@ -18,5 +18,17 @@ irc = {
     'NOT_FOUND': {
         "ERROR_MESSAGE": "Not found",
         "ERROR_CODE": 1004
+    },
+    'USER_EXISTS': {
+        "ERROR_MESSAGE": "User exists",
+        "ERROR_CODE": 1005
+    },
+    'ROLE_NOT_FOUND': {
+        "ERROR_MESSAGE": "Role not found",
+        "ERROR_CODE": 1006
+    },
+    'EMAIL_ROLES_AND_PASSWORD_IS_REQUIRED': {
+        "ERROR_MESSAGE": "Email, roles and password is required",
+        "ERROR_CODE": 1007
     }
 }

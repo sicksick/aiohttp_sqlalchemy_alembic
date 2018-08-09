@@ -1,6 +1,6 @@
+import datetime
 import logging
 import os
-import datetime
 from logging.handlers import TimedRotatingFileHandler
 
 

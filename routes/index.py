@@ -1,7 +1,7 @@
 import time
-from aiohttp_session import get_session
+
 import aiohttp_jinja2
-import jinja2
+from aiohttp_session import get_session
 
 
 def init(app):

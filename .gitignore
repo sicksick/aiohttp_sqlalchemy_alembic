@@ -52,6 +52,7 @@ Thumbs.db
 __pycache__
 MANIFEST
 dist/
+front/
 docs/_build/
 docs/locale/
 node_modules/
@@ -70,4 +71,5 @@ redis_data
 postgres-data
 .DS_Store
 .env
+config/config.py
 docker-compose.yml

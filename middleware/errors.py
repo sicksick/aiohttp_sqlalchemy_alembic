@@ -7,7 +7,7 @@ from helpers.irc import irc
 
 class CustomHTTPException(Response, Exception):
 
-    def __init__(self, body=irc['INTERNAL_SERVER_ERROR'], status=400):
+    def __init__(self, body=irc['INTERNAL_SERVER_ERROR'], status=500):
         Response.__init__(self,
                           status=status,
                           headers=None,

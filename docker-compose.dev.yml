@@ -1,42 +1,49 @@
 version: '3'
 services:
+  nginx:
+    depends_on:
+      - web
+    image: nginx:stable
+    volumes:
+      - ./nginx/dev/conf.d/web.conf:/etc/nginx/conf.d/web.conf
+      - ./nginx/dev/nginx.conf:/etc/nginx/nginx.conf
+      - .:/code
+    restart: always
+    ports:
+      - 80:8888
   web:
     depends_on:
       - postgres
       - redis
-    networks:
-      - backend
     build: .
     env_file: .env
     restart: always
-    command: bash -I -c "python3 app.py"
+    command: bash -I -c "gunicorn app:app --config python:config.gunicorn"
     links:
       - postgres
       - redis
     volumes:
       - .:/code
-      - ./public/static:/code/public/static
-      - ./public/media:/code/public/media
+    expose:
+      - "8080"
     ports:
-      - 8000:8000
+      - 8080:8080
   postgres:
-    networks:
-      - backend
     image: postgres:9.6
     env_file: .env
     volumes:
       - ./data/postgres-data:/var/lib/postgresql/data
     ports:
-      - "8003:5432"
+      - "8004:5432"
   redis:
     image: redis:latest
-    networks:
-      - backend
     env_file: .env
     volumes:
       - ./data/redis_data:/data
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
 networks:
-  backend:
+  default:
+    external:
+      name: webproxy

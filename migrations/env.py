@@ -73,7 +73,7 @@ def run_migrations_online():
     url = f"{os.getenv('POSTGRES_TYPE')}://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@" \
           f"{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
 
-    config_dict = config.get_section(config.config_ini_section)
+    config_dict = dict()
     config_dict['sqlalchemy.url'] = url
 
     connectable = engine_from_config(

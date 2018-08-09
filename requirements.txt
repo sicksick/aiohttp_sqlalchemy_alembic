@@ -22,3 +22,9 @@ pyjwt
 bcrypt
 aiohttp-jinja2
 jinja2
+bcrypt
+python-engineio
+python_socketio
+uvloop
+gunicorn
+pytz
