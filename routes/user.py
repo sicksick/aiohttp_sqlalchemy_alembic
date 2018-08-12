@@ -1,5 +1,6 @@
 import bcrypt
 import jwt
+from aiohttp import web
 from aiohttp.web import json_response
 
 from helpers.acl import acl
@@ -12,6 +13,7 @@ def init(app):
     prefix = '/api/user'
     app.router.add_post(prefix + '/login', login)
     app.router.add_post(prefix + '', create_user)
+    app.router.add_post(prefix + '/login/facebook', user_facebook_login)
 
 
 @acl(['admin'])
@@ -40,6 +42,14 @@ async def create_user(request):
 
     return json_response({"roles": roles})
 
+
+async def user_facebook_login(request):
+    data = await request.post()
+    status = data.get('status', None)
+    token = data.get('token', None)
+    if status == 'connected':
+        return json_response({'status': 'connected'})
+    return json_response({"status": "failed"}, status=401)
 
 async def login(request):
     data = await request.json()

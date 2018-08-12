@@ -5,8 +5,7 @@ from aiohttp_session import get_session
 
 
 def init(app):
-    prefix = ''
-    app.router.add_get(prefix + '/', home)
+    app.router.add_get('/', home)
 
 
 @aiohttp_jinja2.template('index.html')
