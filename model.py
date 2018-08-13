@@ -34,13 +34,30 @@ async def as_dict(obj):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, nullable=False)
-    email = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=True, unique=True)
     password = Column(String, nullable=False)
     firstname = Column(String, nullable=True)
     lastname = Column(String, nullable=True)
     image = Column(String, nullable=True)
+    facebook_id = Column(String, nullable=True)
+    google_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    @staticmethod
+    async def get_user_by_facebook_id(facebook_id: str) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_user.c.id,
+                               sa_user.c.email,
+                               sa_user.c.password,
+                               sa_user.c.firstname,
+                               sa_user.c.lastname,
+                               sa_user.c.image
+                               ]) \
+                .select_from(sa_user) \
+                .where(sa_user.c.facebook_id == facebook_id)
+            users = list(map(lambda x: dict(x), await conn.execute(query)))
+            return users[0] if len(users) == 1 else None
 
     @staticmethod
     async def get_user_by_email(email: str) -> list:
