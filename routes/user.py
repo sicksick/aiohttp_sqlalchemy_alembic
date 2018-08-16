@@ -18,6 +18,7 @@ def init(app):
     app.router.add_post(prefix + '/login', login)
     app.router.add_post(prefix + '', create_user)
     app.router.add_post(prefix + '/login/facebook', user_facebook_login)
+    app.router.add_post(prefix + '/login/google', user_google_login)
 
 
 @acl(['admin'])
@@ -109,3 +110,7 @@ async def login(request):
     else:
         return CustomHTTPException(irc['USER_NOT_FOUND'], 404)
     return json_response({"token": encoded, "roles": roles})
+
+
+async def user_google_login(request):
+    return json_response({'token': "token", 'user': "user", 'roles': "roles"})
