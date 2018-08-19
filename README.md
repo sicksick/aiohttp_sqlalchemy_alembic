@@ -8,16 +8,15 @@
     cp docker-compose.dev.yml docker-compose.yml
     cp config/config_example.py config/config.py
     cp .env_example .env
+    add FACEBOOK_ID to .env file
+    add GOOGLE_SIGNIN_CLIENT_ID to .env file
     docker-compose up -d
     docker-compose exec web alembic upgrade head
     docker-compose exec web python create_admin.py
 ```
 
-##### after setup:
-```
-    add FACEBOOK_ID to .env file
-    add GOOGLE_SIGNIN_CLIENT_ID to .env file
-```
+#### [Check it -> http://localhost/](http://localhost/)
+
 
 ##### Postman collection
 ```
