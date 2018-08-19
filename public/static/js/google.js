@@ -5,10 +5,9 @@ function onSignIn(googleUser) {
     if (id_token) {
         var profile = googleUser.getBasicProfile();
         var jqxhr = $.post("/api/user/login/google", {
-            "token": id_token,
-            "profile": profile
+            "token": id_token
         }, function () {
-        })
+        }, "json")
             .done(function (data) {
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('token', data.token);

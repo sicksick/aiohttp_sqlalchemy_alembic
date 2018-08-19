@@ -1,3 +1,4 @@
+import json
 import uuid
 
 import aiohttp
@@ -52,20 +53,23 @@ async def user_facebook_login(request):
     data = await request.post()
     status = data.get('status', None)
     token = data.get('token', None)
+
     if status == 'connected':
 
         facebook_url_me = f'https://graph.facebook.com/me?redirect=false&access_token={token}'
+
         async with aiohttp.ClientSession() as session:
             async with session.get(facebook_url_me) as r:
                 data_from_facebook = await r.json()
                 user = await User.get_user_by_facebook_id(data_from_facebook['id'])
+
                 if not user:
                     data_user = dict()
-                    # TODO создать пользователя
                     password = str(uuid.uuid4()).encode('utf-8')
                     data_user['password'] = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
                     data_user['roles'] = ['user']
                     data_user['facebook_id'] = data_from_facebook['id']
+
                     if 'name' in data_from_facebook:
                         name_list = data_from_facebook['name'].split(' ')
                         if len(name_list) > 1:
@@ -113,4 +117,58 @@ async def login(request):
 
 
 async def user_google_login(request):
-    return json_response({'token': "token", 'user': "user", 'roles': "roles"})
+    data = await request.post()
+    token = data.get('token', None)
+
+    if token:
+        google_url = f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}'
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(google_url) as r:
+                data_from_google = await r.json()
+                user = await User.get_user_by_google_id(data_from_google['sub'])
+
+                if not user:
+                    data_user = dict()
+                    password = str(uuid.uuid4()).encode('utf-8')
+                    data_user['password'] = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+                    data_user['roles'] = ['user']
+                    data_user['google_id'] = data_from_google['sub']
+
+                    if 'name' in data_from_google:
+                        name_list = data_from_google['name'].split(' ')
+
+                        if len(name_list) > 1:
+                            data_user['firstname'] = ' '.join(name_list[:-1])
+                            data_user['lastname'] = name_list[-1]
+                        else:
+                            data_user['firstname'] = data_from_google['name']
+
+                    if 'picture' in data_from_google:
+                        data_user['image'] = data_from_google['picture']
+
+                    if 'email' in data_from_google and data_from_google['email_verified'] == 'true':
+                        data_user['email'] = data_from_google['email']
+
+                    user_id = await User.create_user(data_user)
+                    user = await User.get_user_by_id(user_id)
+                    roles = [role['name'] for role in await Role.get_roles_by_id(user['id']) if role['name']]
+
+                    if bcrypt.checkpw(password, str(user['password']).encode('utf-8')):
+                        del user['password']
+                        encoded = jwt.encode({'user': user, 'roles': roles}, request.app.config['secret'],
+                                             algorithm='HS256').decode('utf-8')
+                    else:
+                        return CustomHTTPException(irc['ACCESS_DENIED'], 401)
+
+                    return json_response({'token': encoded, 'user': user, 'roles': roles})
+                else:
+                    roles = [role['name'] for role in await Role.get_roles_by_id(user['id']) if role['name']]
+                    del user['password']
+                    encoded = jwt.encode({'user': user, 'roles': roles}, request.app.config['secret'],
+                                         algorithm='HS256').decode('utf-8')
+                    return json_response({'token': encoded, 'user': user, 'roles': roles})
+
+        return json_response({'token': "token", 'user': "user", 'roles': "roles"})
+
+    return json_response({"status": "failed"}, status=401)

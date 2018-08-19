@@ -1,5 +1,7 @@
-# aiohttp nginx postgresql redis 
-# socker.io sqlalchemy alembic docker
+# aiohttp nginx postgresql redis docker
+# socker.io sqlalchemy alembic 
+# google and fasebook auth 
+
 
 ##### Setup:
 ```

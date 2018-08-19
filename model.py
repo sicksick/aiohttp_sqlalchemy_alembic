@@ -60,6 +60,21 @@ class User(Base):
             return users[0] if len(users) == 1 else None
 
     @staticmethod
+    async def get_user_by_google_id(google_id: str) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_user.c.id,
+                               sa_user.c.email,
+                               sa_user.c.password,
+                               sa_user.c.firstname,
+                               sa_user.c.lastname,
+                               sa_user.c.image
+                               ]) \
+                .select_from(sa_user) \
+                .where(sa_user.c.google_id == google_id)
+            users = list(map(lambda x: dict(x), await conn.execute(query)))
+            return users[0] if len(users) == 1 else None
+
+    @staticmethod
     async def get_user_by_email(email: str) -> list:
         async with config['db'].acquire() as conn:
             query = sa.select([sa_user.c.id,
