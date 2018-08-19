@@ -12,7 +12,6 @@ function onSignIn(googleUser) {
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('roles', JSON.stringify(data.roles));
-                $(".alert-google-success").addClass('show').alert();
                 document.location.href = URL_REDIRECT_AFTER_LOGIN
             })
             .fail(function () {

@@ -42,11 +42,12 @@ async def create_user(request):
     roles = [role['name'] for role in await Role.get_roles_by_id(user['id']) if role['name']]
 
     if bcrypt.checkpw(password, str(user['password']).encode('utf-8')):
+        del user['password']
         encoded = jwt.encode({'user': user, 'roles': roles}, request.app.config['secret'], algorithm='HS256').decode('utf-8')
     else:
         return CustomHTTPException(irc['ACCESS_DENIED'], 401)
 
-    return json_response({"roles": roles})
+    return json_response({'token': encoded, 'user': user, 'roles': roles})
 
 
 async def user_facebook_login(request):
@@ -168,7 +169,5 @@ async def user_google_login(request):
                     encoded = jwt.encode({'user': user, 'roles': roles}, request.app.config['secret'],
                                          algorithm='HS256').decode('utf-8')
                     return json_response({'token': encoded, 'user': user, 'roles': roles})
-
-        return json_response({'token': "token", 'user': "user", 'roles': "roles"})
 
     return json_response({"status": "failed"}, status=401)
