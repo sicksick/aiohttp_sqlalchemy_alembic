@@ -3,8 +3,10 @@ function onSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
 
     if (id_token) {
+        var profile = googleUser.getBasicProfile();
         var jqxhr = $.post("/api/user/login/google", {
-            "token": id_token
+            "token": id_token,
+            "profile": profile
         }, function () {
         })
             .done(function (data) {
