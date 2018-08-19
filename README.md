@@ -13,6 +13,12 @@
     docker-compose exec web python create_admin.py
 ```
 
+##### after setup:
+```
+    add FACEBOOK_ID to .env file
+    add GOOGLE_SIGNIN_CLIENT_ID to .env file
+```
+
 ##### Postman collection
 ```
     aiohttp_sqlalchemy_alembic.postman_collection.json

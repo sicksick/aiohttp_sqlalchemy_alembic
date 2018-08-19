@@ -13,11 +13,6 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3b3JrZXIiOnsiaWQiOjUsImVtYWlsIjoibmF0NDEzMTBAZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTIkd3ouLlBiVk4uS3RkUG4zZUp6cm00dU5oVVF6RjJxWnNJbi9qNVFRSUZRd0IuVDkuTnNYTi4iLCJmaXJzdG5hbWUiOm51bGwsImxhc3RuYW1lIjpudWxsLCJpbWFnZSI6bnVsbH0sInJvbGVzIjpbIndvcmtlciIsImFkbWluIl19.60pcO3NyRMIuM3vyTE36jCzMfwuXw2733ZOK7UYtz1g",
-						"disabled": true
 					}
 				],
 				"body": {
@@ -39,6 +34,64 @@
 			"response": []
 		},
 		{
+			"name": "/api/user/login/google",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"token\": \"token\"\n}"
+				},
+				"url": {
+					"raw": "{{server}}/api/user/login/google",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login",
+						"google"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/api/user/login/facebook",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"token\": \"token\",\n  \"status\": \"status\"\n}"
+				},
+				"url": {
+					"raw": "{{server}}/api/user/login/facebook",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"user",
+						"login",
+						"facebook"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/api/user     CREATE_USER",
 			"request": {
 				"method": "POST",
@@ -54,7 +107,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"email\": \"god0@gmail.com\",\n  \"password\": \"qwerqwer\",\n  \"roles\": [\"worker\", \"admin\"]\n} "
+					"raw": "{\n  \"email\": \"god0@gmail.com\",\n  \"password\": \"qwerqwer\",\n  \"roles\": [\"user\", \"admin\"]\n} "
 				},
 				"url": {
 					"raw": "{{server}}/api/user",
