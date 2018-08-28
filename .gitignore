@@ -53,6 +53,7 @@ __pycache__
 MANIFEST
 dist/
 front/
+front/dist/
 docs/_build/
 docs/locale/
 node_modules/

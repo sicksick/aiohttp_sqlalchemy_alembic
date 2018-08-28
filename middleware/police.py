@@ -3,6 +3,8 @@ import traceback
 import jwt
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPException
+from jwt import InvalidSignatureError
+
 from model import User, Role
 from middleware.errors import CustomHTTPException
 from helpers.irc import irc
@@ -11,7 +13,7 @@ from helpers.irc import irc
 @web.middleware
 async def police_middleware(request, handler):
     try:
-        if 'api/user/login' in str(request.rel_url):
+        if 'api/user/login' in str(request.rel_url) or 'api/user/me' in str(request.rel_url):
             response = await handler(request)
             return response
         if request.rel_url.raw_parts[1] == "api":

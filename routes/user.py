@@ -7,6 +7,7 @@ import bcrypt
 import jwt
 from aiohttp import web
 from aiohttp.web import json_response
+from jwt import InvalidSignatureError
 
 from helpers.acl import acl
 from helpers.irc import irc
@@ -16,10 +17,25 @@ from model import Role, User
 
 def init(app):
     prefix = '/api/user'
+    app.router.add_get(prefix + '/me', me)
     app.router.add_post(prefix + '/login', login)
     app.router.add_post(prefix + '', create_user)
     app.router.add_post(prefix + '/login/facebook', user_facebook_login)
     app.router.add_post(prefix + '/login/google', user_google_login)
+
+
+async def me(request):
+    token = request.query.get('token', None)
+    try:
+        decode = jwt.decode(token, request.app.config['secret'], algorithms=['HS256'])
+    except InvalidSignatureError:
+        return CustomHTTPException(irc['ACCESS_DENIED'], 401)
+    user = await User.get_user_by_id(decode['user']['id'])
+    roles = [role['name'] for role in await Role.get_roles_by_id(user['id']) if role['name']]
+    del user['password']
+    encoded = jwt.encode({'user': user, 'roles': roles}, request.app.config['secret'],
+                         algorithm='HS256').decode('utf-8')
+    return json_response({'token': encoded, 'user': user, 'roles': roles})
 
 
 @acl(['admin'])
