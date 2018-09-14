@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-from model import sa_role
+from models.role import sa_role
 
 revision = 'f5113818dbf4'
 down_revision = '2e8df848f6cf'

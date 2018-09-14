@@ -1,14 +1,12 @@
 from __future__ import with_statement
 import os, sys
+import pathlib
 sys.path.append(os.getcwd())
 from sqlalchemy import engine_from_config, pool, MetaData, Table
 from alembic import context
 from logging.config import fileConfig
 config = context.config
 fileConfig(config.config_file_name)
-model_list = dir()
-from model import *
-new_model = [model for model in dir() if model not in model_list]
 
 
 def combine_metadata(*args):
@@ -20,17 +18,21 @@ def combine_metadata(*args):
     return m
 
 
-module_in_file = __import__("model")
 meta_list = list()
 
-for item in new_model:
-    try:
-        files_module = getattr(module_in_file, item)
-        if isinstance(files_module, Table) is True:
-            meta_list.append(files_module.metadata)
-    except:
-        continue
+for file in [file for file in os.listdir(str(pathlib.Path(__file__).parent.parent) + "/models/") if file != '__pycache__' and file != '__init__.py']:
+    p, m = file.rsplit('.', 1)
+    module_in_file = __import__("models." + str(p))
+    files_module_in_directory = getattr(module_in_file, p)
 
+    new_model = []
+    for item in files_module_in_directory.__dict__:
+        try:
+            files_module = getattr(files_module_in_directory, item)
+            if isinstance(files_module, Table) is True:
+                meta_list.append(files_module.metadata)
+        except Exception as e:
+            print(e)
 
 target_metadata = combine_metadata(meta_list)
 

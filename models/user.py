@@ -1,34 +1,12 @@
-import datetime
-
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, Integer, String, func, ForeignKey, and_
+from sqlalchemy import Column, DateTime, Integer, String, func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import text
-
 from config import config
 from helpers.irc import irc
 from middleware.errors import CustomHTTPException
-
+from models.role import Role
+from models.user_group import UserGroup
 Base = declarative_base()
-
-
-async def as_dict(obj):
-    if isinstance(obj, list):
-        for items in obj:
-            for item in items:
-                if isinstance(items[item], datetime.datetime):
-                    items[item] = str(items[item])
-                if isinstance(items[item], datetime.timedelta):
-                    items[item] = str(items[item])
-        return obj
-    if isinstance(obj, dict):
-        for item in obj:
-            if isinstance(obj[item], datetime.datetime):
-                obj[item] = str(obj[item])
-            if isinstance(obj[item], datetime.timedelta):
-                obj[item] = str(obj[item])
-        return obj
-    return obj
 
 
 class User(Base):
@@ -125,58 +103,4 @@ class User(Base):
         return new_user_id
 
 
-class Role(Base):
-    __tablename__ = 'roles'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String, nullable=False)
-
-    @staticmethod
-    async def get_roles_by_id(id: int) -> list:
-        async with config['db'].acquire() as conn:
-            query = text("""
-                SELECT
-                    r.name as name
-                FROM user_groups
-                left join roles r on user_groups.role_id = r.id
-                where
-                    user_groups.user_id = :id
-                ;
-            """)
-            return list(map(lambda x: dict(x), await conn.execute(query, id=id)))
-
-    @staticmethod
-    async def get_role_by_name(role_name: str) -> list or None:
-        async with config['db'].acquire() as conn:
-            query = text("""
-                SELECT
-                    roles.*
-                FROM roles
-                where
-                    roles.name = :role_name
-                ;
-            """)
-            roles = list(map(lambda x: dict(x), await conn.execute(query, role_name=role_name)))
-            if len(roles) == 1:
-                return roles[0]
-            return None
-
-
-class UserGroup(Base):
-    __tablename__ = 'user_groups'
-    id = Column(Integer, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
-
-    @staticmethod
-    async def add_role_to_user(user_id: int, role_id: int) -> bool:
-        async with config['db'].acquire() as conn:
-            query = sa_user_group.insert().values({"user_id": user_id, "role_id": role_id})
-            result = list(map(lambda x: dict(x), await conn.execute(query)))
-            if len(result) != 1:
-                raise CustomHTTPException(irc['INTERNAL_SERVER_ERROR'], 500)
-            return True
-
-
-sa_user_group = UserGroup.__table__
-sa_role = Role.__table__
 sa_user = User.__table__

@@ -12,7 +12,8 @@ from jwt import InvalidSignatureError
 from helpers.acl import acl
 from helpers.irc import irc
 from middleware.errors import CustomHTTPException
-from model import Role, User
+from models.user import User
+from models.role import Role
 
 
 def init(app):

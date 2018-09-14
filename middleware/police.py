@@ -5,7 +5,8 @@ from aiohttp import web
 from aiohttp.web_exceptions import HTTPException
 from jwt import InvalidSignatureError
 
-from model import User, Role
+from models.user import User
+from models.role import Role
 from middleware.errors import CustomHTTPException
 from helpers.irc import irc
 
