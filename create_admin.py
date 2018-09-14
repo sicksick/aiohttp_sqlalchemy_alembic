@@ -1,12 +1,11 @@
 import asyncio
 import os
-
 import aiopg.sa
 import bcrypt
 from sqlalchemy import text
-
 from app import app
-from model import sa_user, sa_user_group
+from models.user import sa_user
+from models.user_group import sa_user_group
 
 
 async def create_admin():

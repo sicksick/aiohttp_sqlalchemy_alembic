@@ -12,6 +12,7 @@ from helpers.socket_io import get_socket_io_route
 from middleware.errors import errors_middleware
 from middleware.police import police_middleware
 from routes import apply_routes
+from aiojobs.aiohttp import setup as setup_aiojobs
 
 
 async def dispose_redis_pool(app):
@@ -55,6 +56,7 @@ app.on_startup.append(init_pg)
 app.on_cleanup.append(close_pg)
 app.on_cleanup.append(dispose_redis_pool)
 sio.start_background_task(background_task)
+setup_aiojobs(app)
 
 if __name__ == '__main__':
     web.run_app(app, host=os.getenv('HOST', '0.0.0.0'), port=os.getenv('PORT', '8080'))
