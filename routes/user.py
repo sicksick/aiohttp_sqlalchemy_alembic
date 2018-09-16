@@ -1,16 +1,13 @@
-import json
 import uuid
-
 import aiohttp
-
 import bcrypt
 import jwt
-from aiohttp import web
 from aiohttp.web import json_response
 from jwt import InvalidSignatureError
 
 from helpers.acl import acl
 from helpers.irc import irc
+from helpers.validator_schema import validate
 from middleware.errors import CustomHTTPException
 from models.user import User
 from models.role import Role
@@ -27,6 +24,9 @@ def init(app):
 
 async def me(request):
     token = request.query.get('token', None)
+    schema = {'token': {'required': True, "type": 'string'}}
+    await validate({"token": token}, schema)
+
     try:
         decode = jwt.decode(token, request.app.config['secret'], algorithms=['HS256'])
     except InvalidSignatureError:
@@ -43,8 +43,12 @@ async def me(request):
 async def create_user(request):
     data = await request.json()
 
-    if 'password' not in data or 'email' not in data or 'roles' not in data:
-        return CustomHTTPException(irc['EMAIL_ROLES_AND_PASSWORD_IS_REQUIRED'], 422)
+    schema = {
+        'email': {'required': True, "type": 'string'},
+        'password': {'required': True, "type": 'string'},
+        'roles': {'type': 'list', 'required': True, 'items': [{'type': 'string'}]}
+    }
+    await validate(data, schema)
 
     users = await User.get_user_by_email(data['email'])
     if len(users) >= 1:
@@ -68,7 +72,11 @@ async def create_user(request):
 
 
 async def user_facebook_login(request):
-    data = await request.post()
+    data = await request.json()
+
+    schema = {'token': {'required': True, "type": 'string'}, 'status': {'required': True, "type": 'string'}}
+    await validate(data, schema)
+
     status = data.get('status', None)
     token = data.get('token', None)
 
@@ -120,7 +128,12 @@ async def user_facebook_login(request):
 
 async def login(request):
     data = await request.json()
+
+    schema = {'email': {'required': True}, 'password': {'required': True}}
+    await validate(data, schema)
+
     users = await User.get_user_by_email(data['email'])
+
     if len(users) == 1:
         password = users[0]['password'].encode('utf-8')
         if bcrypt.checkpw(str(data['password']).encode('utf-8'), password):
@@ -136,7 +149,11 @@ async def login(request):
 
 async def user_google_login(request):
     data = await request.post()
-    token = data.get('token', None)
+
+    schema = {'token': {'required': True, "type": 'string'}}
+    await validate(data, schema)
+
+    token = data.get('token')
 
     if token:
         google_url = f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={token}'

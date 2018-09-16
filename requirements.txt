@@ -16,3 +16,4 @@ python_socketio
 uvloop
 gunicorn
 pytz
+cerberus

@@ -14,7 +14,7 @@ class CustomHTTPException(Response, Exception):
                           reason=None,
                           text=None,
                           content_type='application/json',
-                          body=json.dumps({"error": body}),
+                          body=json.dumps({"errors": body}),
         )
 
 
