@@ -20,19 +20,24 @@ def get_socket_io_route(sio):
         try:
             decode = jwt.decode(token, config['secret'], algorithms=['HS256'])
         except jwt.DecodeError:
-            logger.exception('')
-            return
+            return await sio.disconnect(sid)
+        except Exception as e:
+            return await sio.disconnect(sid)
         decode['user']['roles'] = decode['roles']
-        del decode['user']['password']
-        decode['user']['status'] = 'busy'
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
-        await sio.emit('connect', {'data': decode['user']}, room=sid)
+        users_socket[sid]['scraper'] = {
+            'current_type_scraper': None
+        }
+        await sio.emit('auth', {'data': decode['user']}, room=sid)
 
     @sio.on('disconnect')
     async def disconnect(sid):
-        user = users_socket[sid]
-        del users_socket[sid]
+        if sid in users_socket:
+            user = users_socket[sid]
+            del users_socket[sid]
+        return await sio.disconnect(sid)
+
 
     async def background_task():
 
