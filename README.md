@@ -38,7 +38,7 @@
 ### Alembic for db migrations
 ```
     Genarate new migration:
-        - docker-compose exec web alembic revision --autogenerate -m "create tables";
+        - docker-compose exec web alembic revision --autogenerate -m "create tables"
     Migrate:
         - docker-compose exec web alembic upgrade head
     Migrate undo last:

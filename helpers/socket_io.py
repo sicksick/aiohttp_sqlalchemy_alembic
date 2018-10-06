@@ -1,6 +1,7 @@
 import logging
 
 import jwt
+import socketio
 
 from config.config import config
 
@@ -10,9 +11,18 @@ users_socket = dict()
 
 
 def get_socket_io_route(sio):
+
+    @sio.on('enter room')
+    def enter_room(sid, data):
+        sio.enter_room(sid, data['room'])
+
+    @sio.on('leave room')
+    def leave_room(sid, data):
+        sio.leave_room(sid, data['room'])
+
     @sio.on('my event')
-    async def test_message(sid, message):
-        await sio.emit('my response', {'data': message['data']}, room=sid)
+    async def test_message(sid):
+        print('my event')
 
     @sio.on('connect')
     async def connect(sid, environ):
@@ -26,9 +36,6 @@ def get_socket_io_route(sio):
         decode['user']['roles'] = decode['roles']
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
-        users_socket[sid]['scraper'] = {
-            'current_type_scraper': None
-        }
         await sio.emit('auth', {'data': decode['user']}, room=sid)
 
     @sio.on('disconnect')
@@ -37,7 +44,6 @@ def get_socket_io_route(sio):
             user = users_socket[sid]
             del users_socket[sid]
         return await sio.disconnect(sid)
-
 
     async def background_task():
 
@@ -50,4 +56,3 @@ def get_socket_io_route(sio):
                 logger.exception('')
 
     return sio, background_task
-
