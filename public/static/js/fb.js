@@ -1,19 +1,25 @@
 // This is called with the results from from FB.getLoginStatus().
 function statusChangeCallback(response) {
     if (response.status === 'connected') {
-        var jqxhr = $.post("/api/user/login/facebook", {
-            "status": response.status,
-            "token": response.authResponse.accessToken
-        }, function () {})
-            .done(function (data) {
+        $.ajax({
+            url: "/api/user/login/facebook",
+            type: "POST",
+            data: JSON.stringify({
+                "status": response.status,
+                "token": response.authResponse.accessToken
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
                 localStorage.setItem('user', JSON.stringify(data.user));
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('roles', JSON.stringify(data.roles));
                 document.location.href = URL_REDIRECT_AFTER_LOGIN
-            })
-            .fail(function () {
+            },
+            error: function () {
                 $(".alert-facebook-warning").addClass('show').alert();
-            });
+            }
+        });
     }
 }
 
@@ -24,17 +30,20 @@ function checkLoginState() {
 }
 
 window.fbAsyncInit = function () {
-    FB.init({
-        appId: FACEBOOK_ID,
-        cookie: true,  // enable cookies to allow the server to access
-                       // the session
-        xfbml: true,  // parse social plugins on this page
-        version: 'v2.8' // use graph api version 2.8
-    });
+    if (FACEBOOK_ID !== "None") {
+        FB.init({
+            appId: FACEBOOK_ID,
+            cookie: true,  // enable cookies to allow the server to access
+                           // the session
+            xfbml: true,  // parse social plugins on this page
+            version: 'v2.8' // use graph api version 2.8
+        });
 
-    FB.getLoginStatus(function (response) {
-        statusChangeCallback(response);
-    });
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
+    }
+
 };
 
 // Load the SDK asynchronously

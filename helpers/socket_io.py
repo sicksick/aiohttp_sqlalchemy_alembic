@@ -12,14 +12,6 @@ users_socket = dict()
 
 def get_socket_io_route(sio):
 
-    @sio.on('enter room')
-    def enter_room(sid, data):
-        sio.enter_room(sid, data['room'])
-
-    @sio.on('leave room')
-    def leave_room(sid, data):
-        sio.leave_room(sid, data['room'])
-
     @sio.on('my event')
     async def test_message(sid):
         print('my event')
@@ -34,9 +26,11 @@ def get_socket_io_route(sio):
         except Exception as e:
             return await sio.disconnect(sid)
         decode['user']['roles'] = decode['roles']
+        del decode['user']['password']
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
         await sio.emit('auth', {'data': decode['user']}, room=sid)
+
 
     @sio.on('disconnect')
     async def disconnect(sid):

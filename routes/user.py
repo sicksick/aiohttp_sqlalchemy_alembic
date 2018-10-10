@@ -148,7 +148,7 @@ async def login(request):
 
 
 async def user_google_login(request):
-    data = await request.post()
+    data = await request.json()
 
     schema = {'token': {'required': True, "type": 'string'}}
     await validate(data, schema)
