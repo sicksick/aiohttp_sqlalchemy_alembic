@@ -138,13 +138,14 @@ async def login(request):
         password = users[0]['password'].encode('utf-8')
         if bcrypt.checkpw(str(data['password']).encode('utf-8'), password):
             roles = [role['name'] for role in await Role.get_roles_by_id(users[0]['id']) if role['name']]
+            del users[0]['password']
             encoded = jwt.encode({'user': users[0], "roles": roles}, request.app.config['secret'],
                                  algorithm='HS256').decode('utf-8')
         else:
             return CustomHTTPException(irc['ACCESS_DENIED'], 401)
     else:
         return CustomHTTPException(irc['USER_NOT_FOUND'], 404)
-    return json_response({"token": encoded, "roles": roles})
+    return json_response({"token": encoded, "user": users[0], "roles": roles})
 
 
 async def user_google_login(request):

@@ -37,8 +37,7 @@ async def errors_middleware(app, handler):
             request.app.loggers['rotating'].error(str(traceback.format_exc()))
             return e
         except CustomHTTPException as e:
-            request.app.loggers['rotating'].error(str(traceback.format_exc()))
-            return e
+            pass
         except FileNotFoundError as e:
             request.app.loggers['rotating'].error(str(traceback.format_exc()))
             return CustomHTTPException(irc['NOT_FOUND'], 404)
