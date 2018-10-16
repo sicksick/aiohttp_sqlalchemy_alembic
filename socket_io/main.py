@@ -3,6 +3,7 @@ import logging
 import jwt
 
 from config.config import config
+from models.chat_permission import ChatPermission
 from socket_io.routes.chat import get_chat_routes
 from socket_io.routes.other import get_other_routes
 from socket_io.socket_config import ROUTES, users_socket
@@ -31,9 +32,18 @@ def get_socket_io_route(sio, app):
         decode['user']['roles'] = decode['roles']
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
+
         await sio.emit(ROUTES['FRONT']['AUTH'], {'data': decode['user']}, room=sid)
-        await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {'data': decode['user']}, room=sid)
-        await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {'data': decode['user']}, room=sid)
+
+        await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {
+            'data': [users_socket[user] for user in users_socket if int(users_socket[user]['id']) != int(users_socket[sid]['id'])]
+        }, room=sid)
+
+        participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
+        await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
+
+        # TODO get messages history from participated list
+        await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {'data': ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY']}, room=sid)
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):

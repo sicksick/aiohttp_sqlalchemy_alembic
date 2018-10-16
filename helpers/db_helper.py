@@ -1,4 +1,7 @@
-async def as_dict(obj):
+import datetime
+
+
+def as_dict(obj):
     if isinstance(obj, list):
         for items in obj:
             for item in items:

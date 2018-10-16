@@ -10,6 +10,7 @@ ROUTES = {
         },
         'CHAT': {
             'STATUS': 'chat:status',
+            'PARTICIPATED': 'chat:participated',
             'MESSAGE': {
                 'HISTORY': 'chat:message:history',
                 'NEW': 'chat:message:new'
