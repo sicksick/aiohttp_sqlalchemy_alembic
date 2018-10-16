@@ -15,6 +15,7 @@ def get_chat_routes(sio, app):
     async def chat_invite(sid):
         print(ROUTES['BACK']['CHAT']['INVITE'])
 
+    #MESSAGE
     @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])
     async def chat_message_send(sid):
         print(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])

@@ -11,8 +11,8 @@ ROUTES = {
         'CHAT': {
             'STATUS': 'chat:status',
             'MESSAGE': {
-                'HISTORY': 'message:history',
-                'NEW': 'message:new'
+                'HISTORY': 'chat:message:history',
+                'NEW': 'chat:message:new'
             }
         }
     },
