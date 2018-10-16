@@ -1,11 +1,6 @@
-import sqlalchemy as sa
 from sqlalchemy import Column, DateTime, Integer, String, func
 from sqlalchemy.ext.declarative import declarative_base
-from config import config
-from helpers.irc import irc
-from middleware.errors import CustomHTTPException
-from models.role import Role
-from models.user_group import UserGroup
+
 Base = declarative_base()
 
 

@@ -1,22 +1,25 @@
 import logging
 
 import jwt
-import socketio
 
 from config.config import config
+from socket_io.routes.chat import get_chat_routes
+from socket_io.routes.other import get_other_routes
+from socket_io.socket_config import ROUTES, users_socket
+from socket_io.routes.user import get_user_routes
 
 logger = logging.getLogger('Rotating Log')
 
-users_socket = dict()
 
+def get_socket_io_route(sio, app):
 
-def get_socket_io_route(sio):
+    get_user_routes(sio, app)
 
-    @sio.on('my event')
-    async def test_message(sid):
-        print('my event')
+    get_chat_routes(sio, app)
 
-    @sio.on('connect')
+    get_other_routes(sio, app)
+
+    @sio.on(ROUTES['BACK']['CONNECT'])
     async def connect(sid, environ):
         token = environ.get('HTTP_AUTHORIZATION')
         try:
@@ -31,8 +34,7 @@ def get_socket_io_route(sio):
         users_socket[sid]['sid'] = sid
         await sio.emit('auth', {'data': decode['user']}, room=sid)
 
-
-    @sio.on('disconnect')
+    @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):
         if sid in users_socket:
             user = users_socket[sid]

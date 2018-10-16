@@ -8,7 +8,7 @@ from config.connect_redis import redis_connect
 from config.db import init_pg, close_pg
 from aiohttp_session import setup
 from helpers.log import create_loggers
-from helpers.socket_io import get_socket_io_route
+from socket_io.main import get_socket_io_route
 from middleware.errors import errors_middleware
 from middleware.police import police_middleware
 from routes import apply_routes
@@ -50,7 +50,7 @@ app.middlewares.append(police_middleware)
 #  after
 app.middlewares.append(errors_middleware)
 
-sio, background_task = get_socket_io_route(sio)
+sio, background_task = get_socket_io_route(sio, app)
 
 app.on_startup.append(init_pg)
 app.on_cleanup.append(close_pg)

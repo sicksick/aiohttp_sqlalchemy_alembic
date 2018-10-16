@@ -1,18 +1,18 @@
-from sqlalchemy import Column, DateTime, Integer, String, func, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, func, ForeignKey
+from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
 
-class Message(Base):
-    __tablename__ = 'messages'
+class ChatPermission(Base):
+    __tablename__ = 'chats_permission'
     id = Column(Integer, primary_key=True, nullable=False)
     chat_id = Column(Integer, ForeignKey('chats.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    text = Column(String, nullable=True)
-    image = Column(String, nullable=True)
+    permission = Column('permission',  ENUM('admin', 'user', 'guest', 'removed', name='chats_permission_enum'))
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
-sa_message = Message.__table__
+sa_chat_permission = ChatPermission.__table__
