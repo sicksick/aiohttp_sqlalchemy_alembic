@@ -29,7 +29,6 @@ def get_socket_io_route(sio, app):
         except Exception as e:
             return await sio.disconnect(sid)
         decode['user']['roles'] = decode['roles']
-        del decode['user']['password']
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
         await sio.emit('auth', {'data': decode['user']}, room=sid)
