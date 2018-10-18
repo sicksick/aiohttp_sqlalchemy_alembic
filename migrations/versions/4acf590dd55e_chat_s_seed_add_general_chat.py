@@ -25,6 +25,10 @@ def upgrade():
             {'name': 'general'},
         ]
     )
+    op.execute("""
+    INSERT INTO "public"."chats_permission" ("id", "chat_id", "user_id", "permission", "created_at", "updated_at") 
+    VALUES (DEFAULT, 1, 1, 'admin', '2018-10-18 17:39:26.026000', '2018-10-18 17:39:27.866000');
+    """)
     # ### end Alembic commands ###
 
 

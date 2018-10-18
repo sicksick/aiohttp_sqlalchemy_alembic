@@ -4,6 +4,7 @@ import jwt
 
 from config.config import config
 from models.chat_permission import ChatPermission
+from models.message import Message
 from socket_io.routes.chat import get_chat_routes
 from socket_io.routes.other import get_other_routes
 from socket_io.socket_config import ROUTES, users_socket
@@ -42,8 +43,15 @@ def get_socket_io_route(sio, app):
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
         await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
 
-        # TODO get messages history from participated list
-        await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {'data': ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY']}, room=sid)
+        # participated = await ChatPermission.get_last_participated_by_user_id(int(users_socket[sid]['id']))
+        if len(participated) != 0:
+            first_participated_messages = await Message.get_messages_by_chat_name(participated[0]['name'])
+            await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
+                'data': {
+                    'messages': first_participated_messages,
+                    'chat': participated[0]
+                }
+            }, room=sid)
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):
