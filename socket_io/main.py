@@ -43,7 +43,6 @@ def get_socket_io_route(sio, app):
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
         await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
 
-        # participated = await ChatPermission.get_last_participated_by_user_id(int(users_socket[sid]['id']))
         if len(participated) != 0:
             first_participated_messages = await Message.get_messages_by_chat_name(participated[0]['name'])
             await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
@@ -52,6 +51,7 @@ def get_socket_io_route(sio, app):
                     'chat': participated[0]
                 }
             }, room=sid)
+            users_socket[sid]['active_chat'] = participated[0]
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):
