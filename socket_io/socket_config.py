@@ -1,4 +1,5 @@
 users_socket = dict()
+users_by_user_id = dict()
 
 ROUTES = {
     'FRONT': {
