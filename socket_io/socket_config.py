@@ -7,7 +7,7 @@ ROUTES = {
         'DISCONNECT': 'disconnect',
         'AUTH': 'auth',
         'USER': {
-            'ONLINE': 'user:online'
+            'ALL': 'user:all'
         },
         'CHAT': {
             'STATUS': 'chat:status',

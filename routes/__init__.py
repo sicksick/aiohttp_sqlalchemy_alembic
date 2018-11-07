@@ -12,6 +12,11 @@ def apply_routes(app):
             init(app)
             del init
 
+    media = str(app.config['root_path']) + '/public/media'
+    app.router.add_static("/media/",
+                          path=str(media),
+                          name="media")
+
     static = str(app.config['root_path']) + "/public/static"
     app.router.add_static("/",
                           path=str(static),

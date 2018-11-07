@@ -23,6 +23,8 @@ async def create_admin():
         loop=app.loop)
     data = {
         'email': email,
+        'firstname': 'admin',
+        'image': '/media/avatars/default.png',
         'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
         'roles': ['user', 'admin']
     }

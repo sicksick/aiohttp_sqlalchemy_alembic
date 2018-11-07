@@ -5,6 +5,7 @@ import jwt
 from config.config import config
 from models.chat_permission import ChatPermission
 from models.message import Message
+from models.user import User
 from socket_io.routes.chat import get_chat_routes
 from socket_io.routes.other import get_other_routes
 from socket_io.socket_config import ROUTES, users_socket, users_by_user_id
@@ -39,13 +40,9 @@ def get_socket_io_route(sio, app):
 
         await sio.emit(ROUTES['FRONT']['AUTH'], {'data': decode['user']}, room=sid)
 
-        await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {
-            'data': [users_by_user_id[user] for user in users_by_user_id]
+        await sio.emit(ROUTES['FRONT']['USER']['ALL'], {
+            'data': await User.get_users()
         }, namespace='/')
-
-        await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {
-            'data': [users_by_user_id[user] for user in users_by_user_id]
-        }, room='/')
 
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
         await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)

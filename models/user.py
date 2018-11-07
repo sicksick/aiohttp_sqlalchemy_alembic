@@ -102,5 +102,18 @@ class User(Base):
                 await UserGroup.add_role_to_user(new_user_id, found_role['id'])
         return new_user_id
 
+    @classmethod
+    async def get_users(cls) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_user.c.id,
+                               sa_user.c.email,
+                               sa_user.c.password,
+                               sa_user.c.firstname,
+                               sa_user.c.lastname,
+                               sa_user.c.image
+                               ]) \
+                .select_from(sa_user) \
+                .order_by(sa_user.c.firstname)
+            return list(map(lambda x: dict(x), await conn.execute(query)))
 
 sa_user = User.__table__
