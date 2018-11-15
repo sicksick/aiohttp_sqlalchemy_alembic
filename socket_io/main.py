@@ -45,17 +45,18 @@ def get_socket_io_route(sio, app):
         }, namespace='/')
 
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
-        await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
 
         if len(participated) != 0:
             first_participated_messages = await Message.get_messages_by_chat_name(participated[0]['name'])
+            participated[0]['active'] = True
             await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
                 'data': {
                     'messages': first_participated_messages,
                     'chat': participated[0]
                 }
             }, room=sid)
-            users_socket[sid]['active_chat'] = participated[0]
+
+        await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):
@@ -72,12 +73,13 @@ def get_socket_io_route(sio, app):
                 for sid in sids_fir_remove:
                     del users_socket[sid]
                     del sio.environ[sid]
+
+                if user:
+                    await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {
+                        'data': [users_by_user_id[user] for user in users_by_user_id]
+                    }, namespace='/')
             except:
                 pass
-
-        await sio.emit(ROUTES['FRONT']['USER']['ONLINE'], {
-            'data': [users_by_user_id[user] for user in users_by_user_id]
-        }, namespace='/')
 
         return await sio.disconnect(sid)
 

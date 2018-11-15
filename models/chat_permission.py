@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, distinct
+from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, distinct, or_
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import label
@@ -16,7 +16,7 @@ class ChatPermission(Base):
     __tablename__ = 'chats_permission'
     id = Column(Integer, primary_key=True, nullable=False)
     chat_id = Column(Integer, ForeignKey('chats.id'), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     permission = Column('permission', ENUM('admin', 'user', 'guest', 'removed', name='chats_permission_enum'))
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -43,7 +43,7 @@ class ChatPermission(Base):
                 sa_chat
                     .join(sa_chat_permission, sa_chat_permission.c.chat_id == sa_chat.c.id, isouter=True)
             ) \
-                .where(sa_chat_permission.c.user_id == user_id) \
+                .where(or_(sa_chat_permission.c.user_id == user_id, sa_chat_permission.c.user_id == None)) \
                 .order_by(desc('message_id'))
 
             return list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))

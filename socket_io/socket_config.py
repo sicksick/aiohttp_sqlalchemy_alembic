@@ -30,6 +30,7 @@ ROUTES = {
             'CREATE': 'chat:create',
             'REMOVE': 'chat:remove',
             'INVITE': 'chat:invite',
+            'CHANGE': 'chat:change',
             'MESSAGE': {
                 'SEND': 'chat:message:send',
                 'EDIT': 'chat:message:edit',
