@@ -103,7 +103,7 @@ class User(Base):
         return new_user_id
 
     @classmethod
-    async def get_users(cls) -> list:
+    async def get_users_without_self(cls, id: int) -> list:
         async with config['db'].acquire() as conn:
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
@@ -113,7 +113,9 @@ class User(Base):
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
+                .where(sa_user.c.id != id) \
                 .order_by(sa_user.c.firstname)
             return list(map(lambda x: dict(x), await conn.execute(query)))
+
 
 sa_user = User.__table__

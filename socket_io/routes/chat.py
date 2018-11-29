@@ -5,8 +5,14 @@ from socket_io.socket_config import ROUTES, users_socket
 
 def get_chat_routes(sio, app):
 
+    """
+    Создать чат с другим пользователь
+    :return:
+        - отправить список пользователей, не включая себя;
+        - отправить список с чатами.
+    """
     @sio.on(ROUTES['BACK']['CHAT']['CREATE'])
-    async def chat_invite(sid):
+    async def chat_invite(sid, data):
         print(ROUTES['BACK']['CHAT']['CREATE'])
 
     @sio.on(ROUTES['BACK']['CHAT']['REMOVE'])
@@ -17,9 +23,8 @@ def get_chat_routes(sio, app):
     async def chat_invite(sid):
         print(ROUTES['BACK']['CHAT']['INVITE'])
 
-    @sio.on(ROUTES['BACK']['CHAT']['CHANGE'])
+    @sio.on(ROUTES['BACK']['CHAT']['CHANGE'])  # Переключение на другой чат
     async def chat_invite(sid, data):
-
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
         active_index = 0
         for index, element in enumerate(participated):

@@ -41,7 +41,7 @@ def get_socket_io_route(sio, app):
         await sio.emit(ROUTES['FRONT']['AUTH'], {'data': decode['user']}, room=sid)
 
         await sio.emit(ROUTES['FRONT']['USER']['ALL'], {
-            'data': await User.get_users()
+            'data': await User.get_users_without_self(users_socket[sid]['id'])
         }, namespace='/')
 
         participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
