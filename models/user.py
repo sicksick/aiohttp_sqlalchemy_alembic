@@ -16,7 +16,7 @@ class User(Base):
     password = Column(String, nullable=False)
     firstname = Column(String, nullable=True)
     lastname = Column(String, nullable=True)
-    image = Column(String, nullable=True)
+    image = Column(String, nullable=True, default='/media/avatars/default.png')
     facebook_id = Column(String, nullable=True)
     google_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())

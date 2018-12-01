@@ -6,6 +6,7 @@ from config.config import config
 from models.chat_permission import ChatPermission
 from models.message import Message
 from models.user import User
+from socket_io.helper import get_and_send_participated_by_user_id, send_messages_by_chat_name
 from socket_io.routes.chat import get_chat_routes
 from socket_io.routes.other import get_other_routes
 from socket_io.socket_config import ROUTES, users_socket, users_by_user_id
@@ -36,7 +37,9 @@ def get_socket_io_route(sio, app):
         decode['user']['roles'] = decode['roles']
         users_socket[sid] = decode['user']
         users_socket[sid]['sid'] = sid
-        users_by_user_id[decode['user']['id']] = users_socket[sid]
+        if decode['user']['id'] not in users_by_user_id:
+            users_by_user_id[decode['user']['id']] = list()
+        users_by_user_id[decode['user']['id']].append(sid)
 
         await sio.emit(ROUTES['FRONT']['AUTH'], {'data': decode['user']}, room=sid)
 
@@ -44,19 +47,12 @@ def get_socket_io_route(sio, app):
             'data': await User.get_users_without_self(users_socket[sid]['id'])
         }, namespace='/')
 
-        participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
+        participated = await get_and_send_participated_by_user_id(sio, int(users_socket[sid]['id']), sid)
 
-        if len(participated) != 0:
-            first_participated_messages = await Message.get_messages_by_chat_name(participated[0]['name'])
-            participated[0]['active'] = True
-            await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
-                'data': {
-                    'messages': first_participated_messages,
-                    'chat': participated[0]
-                }
-            }, room=sid)
+        if len(participated) == 0:
+            participated = None
 
-        await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
+        await send_messages_by_chat_name(sio, sid, participated[0] if len(participated) else None)
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):

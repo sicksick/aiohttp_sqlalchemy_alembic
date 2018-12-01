@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, distinct, or_
+from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, or_, Text, and_, asc
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import label
@@ -18,21 +18,23 @@ class ChatPermission(Base):
     chat_id = Column(Integer, ForeignKey('chats.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     permission = Column('permission', ENUM('admin', 'user', 'guest', 'removed', name='chats_permission_enum'))
+    chat_image = Column(Text, default='/media/avatars/default_group.png')
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     @staticmethod
     async def get_participated_by_user_id(user_id: int) -> list:
         async with config['db'].acquire() as conn:
-            message_id = sa.select([sa_message.c.id])  \
-                        .select_from(sa_message) \
-                        .where(sa_chat.c.id == sa_message.c.chat_id)  \
-                        .order_by(desc(sa_message.c.id))  \
-                        .limit(1)\
-                        .as_scalar()
+            message_id = sa.select([sa_message.c.id]) \
+                .select_from(sa_message) \
+                .where(sa_chat.c.id == sa_message.c.chat_id) \
+                .order_by(desc(sa_message.c.id)) \
+                .limit(1) \
+                .as_scalar()
 
             query = sa.select([sa_chat_permission.c.id.label('chat_permission_id'),
                                sa_chat_permission.c.permission,
+                               sa_chat_permission.c.chat_image,
                                sa_chat.c.id.label('chat_id'),
                                sa_chat.c.name,
                                sa_chat.c.created_at,
@@ -44,9 +46,44 @@ class ChatPermission(Base):
                     .join(sa_chat_permission, sa_chat_permission.c.chat_id == sa_chat.c.id, isouter=True)
             ) \
                 .where(or_(sa_chat_permission.c.user_id == user_id, sa_chat_permission.c.user_id == None)) \
-                .order_by(desc('message_id'))
+                .order_by(asc('message_id'))
 
             return list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
+
+    @staticmethod
+    async def get_participated_by_user_id_and_chat_id(chat_id: int, user_id: int) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_chat_permission.c.id.label('chat_permission_id'),
+                               sa_chat_permission.c.permission,
+                               sa_chat_permission.c.chat_image,
+                               sa_chat.c.id.label('chat_id'),
+                               sa_chat.c.name,
+                               sa_chat.c.created_at,
+                               ]) \
+                .select_from(
+                    sa_chat
+                    .join(sa_chat_permission, sa_chat_permission.c.chat_id == sa_chat.c.id, isouter=True)
+                ) \
+                .where(
+                    and_(
+                        sa_chat_permission.c.user_id == user_id,
+                        sa_chat_permission.c.chat_id == chat_id
+                    )
+                )
+
+            return list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
+
+    @staticmethod
+    async def get_participated_by_user_id_list(users_id: list) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_chat_permission.c.chat_id]) \
+                .select_from(sa_chat_permission) \
+                .where(sa_chat_permission.c.user_id.in_(users_id)) \
+                .group_by(sa_chat_permission.c.chat_id) \
+                .having(func.count(sa_chat_permission.c.chat_id) == len(users_id))
+
+            users_participated = list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
+            return users_participated[0]['chat_id'] if len(users_participated) > 0 else None
 
     @staticmethod
     async def get_last_participated_by_user_id(user_id: int) -> dict or None:

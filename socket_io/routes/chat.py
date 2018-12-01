@@ -1,5 +1,6 @@
 from models.chat_permission import ChatPermission
 from models.message import Message
+from socket_io.helper import get_and_send_participated_by_user_id, send_messages_by_chat_name
 from socket_io.socket_config import ROUTES, users_socket
 
 
@@ -14,6 +15,25 @@ def get_chat_routes(sio, app):
     @sio.on(ROUTES['BACK']['CHAT']['CREATE'])
     async def chat_invite(sid, data):
         print(ROUTES['BACK']['CHAT']['CREATE'])
+        print(data)
+
+        data['id'].append(users_socket[sid]['id'])
+
+        participated_chat_id = await ChatPermission.get_participated_by_user_id_list(data['id'])
+
+        if participated_chat_id:
+            # Отдаем список с активным этим чатом и историей сообщений
+            participated = await get_and_send_participated_by_user_id(sio, int(users_socket[sid]['id']), sid)
+            active_chat = participated[0]
+
+            for chat_item in participated:
+                if chat_item['chat_id'] == participated_chat_id:
+                    active_chat = chat_item
+
+            return await send_messages_by_chat_name(sio, sid, active_chat)
+
+        # создаем чат и отдаем список с активным этим чатом
+        # Создать запись с картинкой учасника если учасников 2, если больше стандартную груповую картинку
 
     @sio.on(ROUTES['BACK']['CHAT']['REMOVE'])
     async def chat_remove(sid):
@@ -25,25 +45,17 @@ def get_chat_routes(sio, app):
 
     @sio.on(ROUTES['BACK']['CHAT']['CHANGE'])  # Переключение на другой чат
     async def chat_invite(sid, data):
-        participated = await ChatPermission.get_participated_by_user_id(int(users_socket[sid]['id']))
-        active_index = 0
-        for index, element in enumerate(participated):
-            if int(element['chat_id']) == int(data['id']):
-                element['active'] = True
-                active_index = index
-
-        if len(participated) != 0:
-            first_participated_messages = await Message.get_messages_by_chat_name(participated[active_index]['name'])
-            await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
-                'data': {
-                    'messages': first_participated_messages,
-                    'chat': participated[active_index]
-                }
-            }, room=sid)
-
-        await sio.emit(ROUTES['FRONT']['CHAT']['PARTICIPATED'], {'data': participated}, room=sid)
         print(ROUTES['BACK']['CHAT']['CHANGE'])
         print(data)
+
+        participated = await get_and_send_participated_by_user_id(sio, int(users_socket[sid]['id']), sid)
+        active_chat = participated[0]
+
+        for chat_item in participated:
+            if chat_item['chat_id'] == int(data['id']):
+                active_chat = chat_item
+
+        await send_messages_by_chat_name(sio, sid, active_chat)
 
     #MESSAGE
     @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])
