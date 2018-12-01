@@ -1,4 +1,6 @@
 import datetime
+from helpers.irc import irc
+from middleware.errors import CustomHTTPException
 
 
 def as_dict(obj):
@@ -18,3 +20,13 @@ def as_dict(obj):
                 obj[item] = str(obj[item])
         return obj
     return obj
+
+
+async def raise_db_exception(e):
+    error = irc['INTERNAL_SERVER_ERROR']
+    if len(e.args) > 0:
+        error = {
+            "ERROR_MESSAGE": e.args[0],
+            "ERROR_CODE": None
+        }
+    raise CustomHTTPException(error, 422)

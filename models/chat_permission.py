@@ -1,11 +1,13 @@
 import sqlalchemy as sa
-from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, or_, Text, and_, asc
+from aiopg.sa import SAConnection
+from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, or_, Text, and_, asc, literal_column
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import label
-
 from config import config
-from helpers.db_helper import as_dict
+from helpers.db_helper import as_dict, raise_db_exception
+from helpers.irc import irc
+from middleware.errors import CustomHTTPException
 from models.chat import sa_chat
 from models.message import sa_message
 
@@ -74,7 +76,7 @@ class ChatPermission(Base):
             return list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
 
     @staticmethod
-    async def get_participated_by_user_id_list(users_id: list) -> list:
+    async def get_chat_id_by_user_id_list(users_id: list) -> int or None:
         async with config['db'].acquire() as conn:
             query = sa.select([sa_chat_permission.c.chat_id]) \
                 .select_from(sa_chat_permission) \
@@ -84,6 +86,21 @@ class ChatPermission(Base):
 
             users_participated = list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
             return users_participated[0]['chat_id'] if len(users_participated) > 0 else None
+
+    @staticmethod
+    async def create_chat_permission_bulk(chat_permissions: list, connect: SAConnection) -> dict or None:
+        try:
+            query = sa_chat_permission.insert(inline=True)
+            query = query.values(chat_permissions).returning(literal_column('*'))
+            new_permissions = [as_dict(dict(chat_permission))
+                               for chat_permission in (await (await connect.execute(query)).fetchall())]
+
+            if not new_permissions:
+                raise CustomHTTPException(irc['INTERNAL_SERVER_ERROR'], 500)
+
+            return new_permissions
+        except Exception as e:
+            raise await raise_db_exception(e)
 
     @staticmethod
     async def get_last_participated_by_user_id(user_id: int) -> dict or None:

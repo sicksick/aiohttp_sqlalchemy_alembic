@@ -1,15 +1,11 @@
 import logging
-
 import jwt
-
 from config.config import config
-from models.chat_permission import ChatPermission
-from models.message import Message
 from models.user import User
 from socket_io.helper import get_and_send_participated_by_user_id, send_messages_by_chat_name
 from socket_io.routes.chat import get_chat_routes
 from socket_io.routes.other import get_other_routes
-from socket_io.socket_config import ROUTES, users_socket, users_by_user_id
+from socket_io.config import ROUTES, users_socket, users_by_user_id
 from socket_io.routes.user import get_user_routes
 
 logger = logging.getLogger('Rotating Log')

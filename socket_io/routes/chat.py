@@ -1,7 +1,9 @@
+from config import config
+from models.chat import Chat
 from models.chat_permission import ChatPermission
-from models.message import Message
-from socket_io.helper import get_and_send_participated_by_user_id, send_messages_by_chat_name
-from socket_io.socket_config import ROUTES, users_socket
+from models.user import User
+from socket_io.helper import send_participated_by_user_id_and_send_messages
+from socket_io.config import ROUTES, users_socket, users_by_user_id
 
 
 def get_chat_routes(sio, app):
@@ -16,24 +18,68 @@ def get_chat_routes(sio, app):
     async def chat_invite(sid, data):
         print(ROUTES['BACK']['CHAT']['CREATE'])
         print(data)
-
-        data['id'].append(users_socket[sid]['id'])
-
-        participated_chat_id = await ChatPermission.get_participated_by_user_id_list(data['id'])
+        users_id = data['id']
+        users_id.append(users_socket[sid]['id'])
+        participated_chat_id = await ChatPermission.get_chat_id_by_user_id_list(users_id)
 
         if participated_chat_id:
             # Отдаем список с активным этим чатом и историей сообщений
-            participated = await get_and_send_participated_by_user_id(sio, int(users_socket[sid]['id']), sid)
-            active_chat = participated[0]
-
-            for chat_item in participated:
-                if chat_item['chat_id'] == participated_chat_id:
-                    active_chat = chat_item
-
-            return await send_messages_by_chat_name(sio, sid, active_chat)
+            # так как чат уже существует
+            return await send_participated_by_user_id_and_send_messages(sio, sid, participated_chat_id)
 
         # создаем чат и отдаем список с активным этим чатом
-        # Создать запись с картинкой учасника если учасников 2, если больше стандартную груповую картинку
+        users = await User.get_users_by_id_list(users_id)
+        default_image = False if len(users) == 2 else True
+
+        chat_permission_bulk = []
+        chat_name = ''
+        user_admin = users_id[-1]
+        
+        for user in users:
+            chat_name += f" {user['firstname'] if 'firstname' in user else user['email']}"
+
+        async with config['db'].acquire() as connection:
+            try:
+                trans = await connection.begin()
+                chat = await Chat.create_new_chat_by_name(chat_name, connection)
+                if default_image is True:
+                    for user in users:
+                        permission_for_insert = {
+                            "chat_id": chat['id'],
+                            "user_id": user['id'],
+                            "permission": "user"
+                        }
+
+                        if user['id'] == user_admin:
+                            permission_for_insert['permission'] = 'admin'
+
+                        chat_permission_bulk.append(permission_for_insert)
+                else:
+                    chat_permission_bulk.append({
+                        "chat_id": chat['id'],
+                        "user_id": users[0]['id'],
+                        "permission": "admin" if users[0]['id'] == user_admin else "user",
+                        "chat_image": users[1]['image']
+                    })
+                    chat_permission_bulk.append({
+                        "chat_id": chat['id'],
+                        "user_id": users[1]['id'],
+                        "permission": "admin" if users[1]['id'] == user_admin else "user",
+                        "chat_image": users[0]['image']
+                    })
+
+                new_chat_permissions = await ChatPermission.create_chat_permission_bulk(chat_permission_bulk, connection)
+
+                await trans.commit()
+
+                for new_chat_permission in new_chat_permissions:
+                    if new_chat_permission['user_id'] in users_by_user_id:
+                        for online_user_sid in users_by_user_id[new_chat_permission['user_id']]:
+                            await send_participated_by_user_id_and_send_messages(sio, online_user_sid, int(new_chat_permission['chat_id']))
+
+            except Exception as e:
+                await trans.rollback()
+                raise e
 
     @sio.on(ROUTES['BACK']['CHAT']['REMOVE'])
     async def chat_remove(sid):
@@ -47,15 +93,7 @@ def get_chat_routes(sio, app):
     async def chat_invite(sid, data):
         print(ROUTES['BACK']['CHAT']['CHANGE'])
         print(data)
-
-        participated = await get_and_send_participated_by_user_id(sio, int(users_socket[sid]['id']), sid)
-        active_chat = participated[0]
-
-        for chat_item in participated:
-            if chat_item['chat_id'] == int(data['id']):
-                active_chat = chat_item
-
-        await send_messages_by_chat_name(sio, sid, active_chat)
+        return await send_participated_by_user_id_and_send_messages(sio, sid, int(data['id']))
 
     #MESSAGE
     @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])

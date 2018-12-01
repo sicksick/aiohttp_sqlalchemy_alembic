@@ -117,5 +117,18 @@ class User(Base):
                 .order_by(sa_user.c.firstname)
             return list(map(lambda x: dict(x), await conn.execute(query)))
 
+    @classmethod
+    async def get_users_by_id_list(cls, ids: list) -> list:
+        async with config['db'].acquire() as conn:
+            query = sa.select([sa_user.c.id,
+                               sa_user.c.email,
+                               sa_user.c.firstname,
+                               sa_user.c.lastname,
+                               sa_user.c.image
+                               ]) \
+                .select_from(sa_user) \
+                .where(sa_user.c.id.in_(ids))
+            return list(map(lambda x: dict(x), await conn.execute(query)))
+
 
 sa_user = User.__table__

@@ -1,4 +1,4 @@
-from socket_io.socket_config import ROUTES
+from socket_io.config import ROUTES
 
 
 def get_user_routes(sio, app):
