@@ -99,10 +99,7 @@ async def user_facebook_login(request):
                     if 'name' in data_from_facebook:
                         name_list = data_from_facebook['name'].split(' ')
                         if len(name_list) > 1:
-                            data_user['firstname'] = ' '.join(name_list[:-1])
-                            data_user['lastname'] = name_list[-1]
-                        else:
-                            data_user['firstname'] = data_from_facebook['name']
+                            data_user['name'] = data_from_facebook['name']
                     user_id = await User.create_user(data_user)
 
                     user = await User.get_user_by_id(user_id)
@@ -175,10 +172,7 @@ async def user_google_login(request):
                         name_list = data_from_google['name'].split(' ')
 
                         if len(name_list) > 1:
-                            data_user['firstname'] = ' '.join(name_list[:-1])
-                            data_user['lastname'] = name_list[-1]
-                        else:
-                            data_user['firstname'] = data_from_google['name']
+                            data_user['name'] = data_from_google['name']
 
                     if 'picture' in data_from_google:
                         data_user['image'] = data_from_google['picture']

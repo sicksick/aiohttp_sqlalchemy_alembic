@@ -36,7 +36,7 @@ def get_chat_routes(sio, app):
         user_admin = users_id[-1]
         
         for user in users:
-            chat_name += f" {user['firstname'] if 'firstname' in user else user['email']}"
+            chat_name += f" {user['name'] if 'name' in user else user['email']}"
 
         async with config['db'].acquire() as connection:
             try:
@@ -61,14 +61,14 @@ def get_chat_routes(sio, app):
                         "user_id": users[0]['id'],
                         "permission": "admin" if users[0]['id'] == user_admin else "user",
                         "chat_image": users[1]['image'],
-                        "chat_name": users[1]['firstname'] if 'firstname' in users[1] else users[1]['email']
+                        "chat_name": users[1]['name'] if 'name' in users[1] else users[1]['email']
                     })
                     chat_permission_bulk.append({
                         "chat_id": chat['id'],
                         "user_id": users[1]['id'],
                         "permission": "admin" if users[1]['id'] == user_admin else "user",
                         "chat_image": users[0]['image'],
-                        "chat_name": users[0]['firstname'] if 'firstname' in users[0] else users[0]['email']
+                        "chat_name": users[0]['name'] if 'name' in users[0] else users[0]['email']
                     })
 
                 new_chat_permissions = await ChatPermission.create_chat_permission_bulk(chat_permission_bulk, connection)

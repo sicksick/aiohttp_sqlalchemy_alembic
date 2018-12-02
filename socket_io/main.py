@@ -46,7 +46,7 @@ def get_socket_io_route(sio, app):
         if len(participated) == 0:
             participated = None
 
-        await send_messages_by_chat_name(sio, sid, participated[0] if len(participated) else None)
+        await send_messages_by_chat_name(sio, sid, participated[0] if participated else None)
 
     @sio.on(ROUTES['BACK']['DISCONNECT'])
     async def disconnect(sid):

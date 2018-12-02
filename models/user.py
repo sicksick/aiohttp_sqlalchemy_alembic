@@ -14,8 +14,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     email = Column(String, nullable=True, unique=True)
     password = Column(String, nullable=False)
-    firstname = Column(String, nullable=True)
-    lastname = Column(String, nullable=True)
+    name = Column(String, nullable=True)
     image = Column(String, nullable=True, default='/media/avatars/default.png')
     facebook_id = Column(String, nullable=True)
     google_id = Column(String, nullable=True)
@@ -28,8 +27,7 @@ class User(Base):
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
                                sa_user.c.password,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
@@ -43,8 +41,7 @@ class User(Base):
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
                                sa_user.c.password,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
@@ -58,8 +55,7 @@ class User(Base):
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
                                sa_user.c.password,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
@@ -72,8 +68,7 @@ class User(Base):
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
                                sa_user.c.password,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
@@ -108,13 +103,12 @@ class User(Base):
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
                                sa_user.c.password,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \
                 .where(sa_user.c.id != id) \
-                .order_by(sa_user.c.firstname)
+                .order_by(sa_user.c.name)
             return list(map(lambda x: dict(x), await conn.execute(query)))
 
     @classmethod
@@ -122,8 +116,7 @@ class User(Base):
         async with config['db'].acquire() as conn:
             query = sa.select([sa_user.c.id,
                                sa_user.c.email,
-                               sa_user.c.firstname,
-                               sa_user.c.lastname,
+                               sa_user.c.name,
                                sa_user.c.image
                                ]) \
                 .select_from(sa_user) \

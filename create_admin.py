@@ -23,10 +23,10 @@ async def create_admin():
         loop=app.loop)
     data = {
         'email': email,
-        'firstname': 'admin',
+        'name': 'admin',
         'image': '/media/avatars/default.png',
         'password': bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
-        'roles': ['user', 'admin']
+        'roles': ['admin']
     }
     roles = data['roles']
     del data['roles']

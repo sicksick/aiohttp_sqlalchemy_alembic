@@ -31,7 +31,7 @@ class Message(Base):
                                label('message_text', sa_message.c.text),
                                label('message_image', sa_message.c.image),
                                sa_message.c.created_at,
-                               label('user_name', (sa_user.c.firstname + ' ' + sa_user.c.lastname)),
+                               label('user_name', (sa_user.c.name)),
                                sa_user.c.email,
                                label('user_image', sa_user.c.image)
                                ]) \
