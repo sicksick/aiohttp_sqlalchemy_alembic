@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from aiopg.sa import SAConnection
-from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, or_, Text, and_, asc, literal_column
+from sqlalchemy import Column, DateTime, Integer, func, ForeignKey, desc, or_, Text, and_, asc, literal_column, String, \
+    text
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import label
@@ -21,6 +22,7 @@ class ChatPermission(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     permission = Column('permission', ENUM('admin', 'user', 'guest', 'removed', name='chats_permission_enum'))
     chat_image = Column(Text, default='/media/avatars/default_group.png')
+    chat_name = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
@@ -36,9 +38,9 @@ class ChatPermission(Base):
 
             query = sa.select([sa_chat_permission.c.id.label('chat_permission_id'),
                                sa_chat_permission.c.permission,
+                               sa_chat_permission.c.chat_name,
                                sa_chat_permission.c.chat_image,
                                sa_chat.c.id.label('chat_id'),
-                               sa_chat.c.name,
                                sa_chat.c.created_at,
                                message_id.label('message_id')
 
@@ -58,8 +60,8 @@ class ChatPermission(Base):
             query = sa.select([sa_chat_permission.c.id.label('chat_permission_id'),
                                sa_chat_permission.c.permission,
                                sa_chat_permission.c.chat_image,
+                               sa_chat_permission.c.chat_name,
                                sa_chat.c.id.label('chat_id'),
-                               sa_chat.c.name,
                                sa_chat.c.created_at,
                                ]) \
                 .select_from(
@@ -75,17 +77,41 @@ class ChatPermission(Base):
 
             return list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
 
-    @staticmethod
-    async def get_chat_id_by_user_id_list(users_id: list) -> int or None:
-        async with config['db'].acquire() as conn:
-            query = sa.select([sa_chat_permission.c.chat_id]) \
-                .select_from(sa_chat_permission) \
-                .where(sa_chat_permission.c.user_id.in_(users_id)) \
-                .group_by(sa_chat_permission.c.chat_id) \
-                .having(func.count(sa_chat_permission.c.chat_id) == len(users_id))
+    # @staticmethod
+    # async def get_chat_id_by_user_id_list(users_id: list) -> int or None:
+    #     async with config['db'].acquire() as conn:
+    #         query = sa.select([sa_chat_permission.c.chat_id]) \
+    #             .select_from(sa_chat_permission) \
+    #             .where(sa_chat_permission.c.user_id.in_(users_id)) \
+    #             .group_by(sa_chat_permission.c.chat_id) \
+    #             .having(func.count(sa_chat_permission.c.chat_id) == len(users_id))
+    #
+    #         users_participated = list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
+    #         return users_participated[0]['chat_id'] if len(users_participated) > 0 else None
 
-            users_participated = list(map(lambda x: as_dict(dict(x)), await conn.execute(query)))
-            return users_participated[0]['chat_id'] if len(users_participated) > 0 else None
+    @staticmethod
+    async def get_chat_id_by_user_id_list(users_id: list) -> list:
+        async with config['db'].acquire() as conn:
+            query = text("""
+                SELECT chat_id
+                from (SELECT
+                        cp.chat_id,
+                        count(cp.chat_id) as found_members,
+                        (select count(cps.id) as all_members
+                         from chats_permission cps
+                         where cp.chat_id = cps.chat_id
+                        )                 as all_members
+                      FROM chats
+                             left join chats_permission cp on chats.id = cp.chat_id
+                      where cp.user_id IN :users_id
+                      group by cp.chat_id) as list
+                where list.found_members = :users_count
+                  and list.all_members = :users_count;
+            """)
+            users_participated = list(map(lambda x: as_dict(dict(x)), await conn.execute(query,
+                                                                                         users_id=tuple(users_id),
+                                                                                         users_count=len(users_id))))
+            return users_participated[0]['chat_id'] if len(users_participated) == 1 else None
 
     @staticmethod
     async def create_chat_permission_bulk(chat_permissions: list, connect: SAConnection) -> dict or None:
@@ -107,7 +133,6 @@ class ChatPermission(Base):
         async with config['db'].acquire() as conn:
             query = sa.select([sa_chat_permission.c.permission,
                                label('chat_id', sa_chat.c.id),
-                               sa_chat.c.name,
                                sa_chat.c.created_at
                                ]) \
                 .select_from(

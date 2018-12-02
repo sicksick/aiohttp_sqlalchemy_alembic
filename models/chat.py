@@ -12,15 +12,14 @@ Base = declarative_base()
 class Chat(Base):
     __tablename__ = 'chats'
     id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String, nullable=True, unique=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     @staticmethod
-    async def create_new_chat_by_name(name: str, connect: SAConnection) -> dict:
+    async def create_new_chat_by_name(connect: SAConnection) -> dict:
         try:
             query = sa_chat.insert(inline=True)
-            query = query.values([{'name': name.strip()}]).returning(literal_column('*'))
+            query = query.values([]).returning(literal_column('*'))
             new_chat = as_dict(dict((await (await connect.execute(query)).fetchall())[0]))
 
             if not new_chat:

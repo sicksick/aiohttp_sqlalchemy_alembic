@@ -4,7 +4,6 @@ from config.config import config
 from models.user import User
 from socket_io.helper import get_and_send_participated_by_user_id, send_messages_by_chat_name
 from socket_io.routes.chat import get_chat_routes
-from socket_io.routes.other import get_other_routes
 from socket_io.config import ROUTES, users_socket, users_by_user_id
 from socket_io.routes.user import get_user_routes
 
@@ -17,7 +16,6 @@ def get_socket_io_route(sio, app):
 
     get_chat_routes(sio, app)
 
-    get_other_routes(sio, app)
 
     @sio.on(ROUTES['BACK']['CONNECT'])
     async def connect(sid, environ):

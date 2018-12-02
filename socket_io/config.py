@@ -21,7 +21,6 @@ ROUTES = {
     'BACK': {
         'CONNECT': 'connect',
         'DISCONNECT': 'disconnect',
-        'MY_EVENT': 'my_event',
         'USER': {
             'INVITE': 'user:invite',
             'EXCLUDE': 'user:exclude'
