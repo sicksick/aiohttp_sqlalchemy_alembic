@@ -1,16 +1,19 @@
 if (GOOGLE_SIGNIN_CLIENT_ID !== "None") {
 
-    $( document ).ready(function() {
+    var clicked = false;//Global Variable
+
+    function clickGoogleLogin() {
+        clicked = true;
+    }
+
+    $(document).ready(function () {
         $(".google-auth").removeClass("d-none");
     });
+
     function onSignIn(googleUser) {
-
-        var id_token = googleUser.getAuthResponse().id_token;
-
-        if (id_token) {
-            var profile = googleUser.getBasicProfile();
-            var jqxhr = $.post("/api/user/login/google", JSON.stringify({
-                "token": id_token
+        if (clicked) {
+            $.post("/api/user/login/google", JSON.stringify({
+                "token": googleUser.getAuthResponse().id_token
             }), function () {
             }, "json")
                 .done(function (data) {
