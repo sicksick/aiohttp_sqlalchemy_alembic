@@ -23,7 +23,7 @@ async def send_messages_by_chat_name(sio, sid: str, active_participated=None) ->
             }
         }, room=sid)
 
-    first_participated_messages = await Message.get_messages_by_chat_name(active_participated['chat_name'])
+    first_participated_messages = await Message.get_messages_by_chat_id(active_participated['chat_id'])
     return await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['HISTORY'], {
         'data': {
             'messages': first_participated_messages,

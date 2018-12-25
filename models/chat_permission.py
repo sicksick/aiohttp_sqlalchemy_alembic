@@ -70,7 +70,7 @@ class ChatPermission(Base):
                 ) \
                 .where(
                     and_(
-                        sa_chat_permission.c.user_id == user_id,
+                        or_(sa_chat_permission.c.user_id == user_id, sa_chat_permission.c.user_id == None),
                         sa_chat_permission.c.chat_id == chat_id
                     )
                 )

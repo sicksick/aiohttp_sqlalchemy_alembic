@@ -1,5 +1,6 @@
 from config import config
 from models.chat import Chat
+from models.message import Message
 from models.chat_permission import ChatPermission
 from models.user import User
 from socket_io.helper import send_participated_by_user_id_and_send_messages
@@ -96,15 +97,30 @@ def get_chat_routes(sio, app):
     Переключение на другой чат
     """
     @sio.on(ROUTES['BACK']['CHAT']['CHANGE'])
-    async def chat_invite(sid, data):
+    async def chat_change(sid, data):
         print(ROUTES['BACK']['CHAT']['CHANGE'])
-        print(data)
         return await send_participated_by_user_id_and_send_messages(sio, sid, int(data['id']))
 
     #MESSAGE
-    @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])
-    async def chat_message_send(sid):
-        print(ROUTES['BACK']['CHAT']['MESSAGE']['SEND'])
+    @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['NEW'])
+    async def chat_message_new(sid, data):
+        user = users_socket[sid]
+        if not user:
+            return
+
+        permission = await ChatPermission.get_participated_by_user_id_and_chat_id(data['activeChat']['chat_id'], user['id'])
+        if not permission or len(permission) == 0:
+            return
+
+        permission = permission[0]
+        new_message = await Message.new_messages_by_chat_id(data['message'], permission['chat_id'], user['id'])
+
+        # TODO сделать отправку всем участникам
+        await sio.emit(ROUTES['FRONT']['CHAT']['MESSAGE']['NEW'], {
+            'new_message': new_message,
+            'chat': data['activeChat']
+        }, namespace='/')
+        print(ROUTES['BACK']['CHAT']['MESSAGE']['NEW'])
 
     @sio.on(ROUTES['BACK']['CHAT']['MESSAGE']['EDIT'])
     async def chat_message_edit(sid):

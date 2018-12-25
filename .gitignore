@@ -1,7 +1,6 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist
 /tmp
 /out-tsc
 
@@ -51,9 +50,6 @@ Thumbs.db
 .tox/
 __pycache__
 MANIFEST
-dist/
-front/
-front/dist/
 docs/_build/
 docs/locale/
 node_modules/
